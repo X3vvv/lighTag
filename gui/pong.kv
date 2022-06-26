@@ -3,8 +3,17 @@
 # e.g. PongApp (extract the part before "App") -> pong.kv
 
 
+# Applied for all PongBall widget instances
+<PongBall>:
+    size: 30, 30
+    canvas:
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
 # Applied for all PongGame widget instances
 <PongGame>: 
+    ball: pong_ball
     canvas:
         Rectangle:
             # .------------> x
@@ -26,3 +35,7 @@
         center_x: root.width * 3 / 4
         top: root.top - 30
         text: "0"
+
+    PongBall:
+        id: pong_ball
+        center: self.parent.center

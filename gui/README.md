@@ -1,0 +1,1 @@
+Kivy library is used to create the GUI application for Android devices.

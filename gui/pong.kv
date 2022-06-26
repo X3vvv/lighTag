@@ -1,0 +1,28 @@
+# this is the configuration file of the kivy application
+# the name of this file must match the name of the application class.
+# e.g. PongApp (extract the part before "App") -> pong.kv
+
+
+# Applied for all PongGame widget instances
+<PongGame>: 
+    canvas:
+        Rectangle:
+            # .------------> x
+            # | (left-up-corner x, left-up-corner y)
+            # |
+            # V
+            # y
+            pos: self.center_x - 3, 0
+            size: 6, self.height  # width, height
+
+    Label:
+        font_size: 55
+        center_x: root.width / 4
+        top: root.top - 30
+        text: "0"
+
+    Label:
+        font_size: 55
+        center_x: root.width * 3 / 4
+        top: root.top - 30
+        text: "0"

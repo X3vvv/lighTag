@@ -1,4 +1,3 @@
-from re import MULTILINE
 import kivy
 from kivy.app import App
 
@@ -6,6 +5,7 @@ from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
+
 
 class MyGridLayout(GridLayout):
     # Initialize infinite keywords
@@ -47,21 +47,20 @@ class MyGridLayout(GridLayout):
         # print("Hello {}, your password is: {}".format(name, pwd))
 
         # Print info to screen
-        if name.strip() == '' or pwd.strip() == '':
+        if name.strip() == "" or pwd.strip() == "":
             msg = "Error: must fill the username and password"
         else:
             msg = "Hello {}, your password is: {}".format(name, pwd)
             # Clear the input boxes
-            self.name.text = ''
-            self.pwd.text = ''
+            self.name.text = ""
+            self.pwd.text = ""
         self.add_widget(Label(text=msg))
-
-
 
 
 class MyApp(App):
     def build(self):
         return MyGridLayout()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     MyApp().run()

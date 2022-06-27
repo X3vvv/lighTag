@@ -1,5 +1,7 @@
 from kivy.app import App
 from kivy.uix.widget import Widget
+from kivy.uix.label import Label
+from kivy.uix.button import Button
 from kivy.properties import NumericProperty, ReferenceListProperty, ObjectProperty
 from kivy.vector import Vector
 from kivy.clock import Clock
@@ -21,6 +23,10 @@ class PongPaddle(Widget):
             offset = 0.02 * Vector(0, ball.center_y - self.center_y)
             ball.velocity = speedup * (offset - ball.velocity)
 
+    def has_won(self, win_score=1):
+        # return true if current player wins
+        return self.score >= win_score
+
 
 class PongBall(Widget):
     # velocity (speed) of the ball on x and y axis
@@ -41,8 +47,12 @@ class PongGame(Widget):
     player1 = ObjectProperty(None)
     player2 = ObjectProperty(None)
 
-    def serve_ball(self, vel=(4, 0)):
+    def reset_ball(self):
         self.ball.center = self.center
+        self.ball.velocity = Vector(0, 0)
+
+    def serve_ball(self, vel=(4, 0)):
+        self.reset_ball()
         self.ball.velocity = vel
 
     def update(self, dt):
@@ -59,16 +69,31 @@ class PongGame(Widget):
         # bounce off left and right
         if self.ball.x < self.x:
             self.player2.score += 1
-            self.serve_ball(vel=(4, 0))
+            if self.player2.has_won():
+                self.reset_ball()
+                self.show_win(player="Player2")
+            else:
+                self.serve_ball(vel=(4, 0))
         if self.ball.right > self.width:
             self.player1.score += 1
-            self.serve_ball(vel=(-4, 0))
+            if self.player1.has_won():
+                self.reset_ball()
+                self.show_win(player="Player1")
+            else:
+                self.serve_ball(vel=(-4, 0))
 
     def on_touch_move(self, touch):
         if touch.x < self.width / 3:
             self.player1.center_y = touch.y
         if touch.x > self.width * 2 / 3:
             self.player2.center_y = touch.y
+
+    def show_win(self, player: str):
+        label = Label(text=f"{player} Win!", font_size=40)
+        label.center_x = self.center_x
+        label.top = self.top * 2 / 3
+        self.add_widget(label)
+        self.add_widget(Button())
 
 
 class PongApp(App):

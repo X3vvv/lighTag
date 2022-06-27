@@ -28,11 +28,12 @@
 
     canvas:
         Rectangle:
-            # .------------> x
-            # | (left-up-corner x, left-up-corner y)
-            # |
-            # V
             # y
+            # ^
+            # |
+            # |  Kivy's coords
+            # |
+            # ·----------------> x
             pos: self.center_x - 3, 0
             size: 6, self.height  # width, height
 

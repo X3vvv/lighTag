@@ -1,0 +1,32 @@
+#:kivy 2.1.0
+<MyGridLayout>
+
+    name: username  # object: id
+    pwd: password  # object: id
+
+    GridLayout:
+        cols: 1
+        size: root.width, root.height
+
+        GridLayout:
+            cols: 2
+
+            Label:
+                text: "Username"
+            TextInput:
+                id: username
+                multiline: False
+
+            Label:
+                text: "Password"
+            TextInput:
+                id: password
+                multiline: False
+                password: True
+
+        Button:
+            text: "Submit"
+            font_size: 32
+            on_press: root.press()
+
+

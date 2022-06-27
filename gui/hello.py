@@ -5,7 +5,40 @@ from kivy.properties import ObjectProperty
 
 from kivy.lang import Builder
 
-Builder.load_file("randomname.kv")  # explicitly assign the kv file with random name
+# Builder.load_file("randomname.kv")  # explicitly assign the kv file with random name
+Builder.load_string(
+    """
+<MyGridLayout>
+
+    name: username  # object: id
+    pwd: password  # object: id
+
+    GridLayout:
+        cols: 1
+        size: root.width, root.height
+
+        GridLayout:
+            cols: 2
+
+            Label:
+                text: "Username"
+            TextInput:
+                id: username
+                multiline: False
+
+            Label:
+                text: "Password"
+            TextInput:
+                id: password
+                multiline: False
+                password: True
+
+        Button:
+            text: "Submit"
+            font_size: 32
+            on_press: root.press()
+"""
+)
 
 
 class MyGridLayout(GridLayout):

@@ -1,40 +1,26 @@
 #:kivy 2.1.0
 #:import utils kivy.utils
-<MyGridLayout>
+<MyLayout>
 
-    name: username  # object: id
-    pwd: password  # object: id
-
-    GridLayout:
-        cols: 1
+    BoxLayout:
         size: root.width, root.height
+        orientation: "vertical" # "horizontal"
 
-        GridLayout:
-            cols: 2
-
-            Label:
-                text: "Username"
-            TextInput:
-                id: username
-                multiline: False
-                # background_normal: ''  # get rid of original grey layer, to not affect bg color
-                # background_color: utils.get_color_from_hex('#FFDCAE')
-
-            Label:
-                text: "Password"
-            TextInput:
-                id: password
-                multiline: False
-                password: True
-                # background_normal: ''  # get rid of original grey layer, to not affect bg color
-                # background_color: utils.get_color_from_hex('#FFDCAE')
+        spacing: 6
+        padding: 10
 
         Button:
-            text: "Submit"
-            font_size: 32
-            on_press: root.press()
-            background_normal: ''  # get rid of original grey layer, to not affect bg color
-            # background_color: (118/255.0, 186/255.0, 153/255.0, 1)
-            background_color: utils.get_color_from_hex('#76BA99')
+            text: "Hello world!"
+
+        Button:
+            text: "Goodbye world!"
+            size_hint: (None, None)
+            width: 100
+            height: 50
+
+        Button:
+            text: "Good night world!"
+            pos_hint: {'center_x': 0.5}
+            size_hint: (.3, .1) # keep the scale: (width, height)
 
 

@@ -42,7 +42,8 @@ class HuiTu(QtWidgets.QMainWindow, Ui_MainWindow):
         self.graphicsView.setScene(self.scene)
 
         # 显示本机IP
-        hostname = socket.gethostname()
+        hostname = "192.168.0.113"
+        # hostname = socket.gethostname()
         ip = socket.gethostbyname(hostname)
         self.label_ip.setText(ip)
 
@@ -474,6 +475,7 @@ class TCP_SERVER(QtCore.QThread):
             try:
                 bytes = client.recv(1024)
                 msg = bytes.decode(encoding='utf8')
+                print(msg+"/n")
                 self.data_draf.emit(msg)  # for debug only
 
                 [location_result, location_seq, location_addr, location_x, location_y] = twr_main(msg)

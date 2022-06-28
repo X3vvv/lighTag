@@ -6,7 +6,7 @@ Created on Wed May 26 15:27:12 2021
 """
 import time  # 引入time模块
 import re
-from Coordinate_process import BP_Process_String
+from Coordinate_process import BP_Process_String #Coordinate_process.py
 import sys
 import numpy as np
 

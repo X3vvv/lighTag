@@ -28,6 +28,7 @@ def Find_Anthor_Coor(Athor_Addr):
             return [1, item['x'], item['y'], item['z']]
     return [0, 0, 0, 0]
 
+#=====================================================
 
 # 处理基站相关信息，获取基站的坐标和对应的时钟timestamp
 # 传入的list 类型[['0003', 230800053236.2253, 10], ['0002', 230800053046.89203, 10], ['0001', 230800053463.46512, 10], ['0004', 230800053532.30975, 10]]
@@ -50,6 +51,7 @@ def Anthor_Coordinate_Process(Anthor_info):
             Find_Anthor_Flag = 1  # 标记找到基站
     return Find_Anthor_Flag, Coorinate_List, TimeStamp_List, RSSI_List
 
+#=====================================================
 
 # input
 # {'tag': 10, 'seq': 32, 'time': 1234, 'anthor_count': 5, 'anthor': [[1, 41393, 17], [2, 41650, 34], [3, 41907, 51], [4, 42164, 68], [5, 42421, 85]]}

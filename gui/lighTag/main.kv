@@ -1,0 +1,75 @@
+#:kivy 2.1.0
+#:import utils kivy.utils
+
+<Label>
+    font_size: 25
+    background_normal: ''
+    background_color: (0,0,0,1)
+
+<Button>
+    background_normal: ''
+    background_color: utils.get_color_from_hex("#1e81b0")
+
+<TextInput>
+    background_normal: ''
+    background_color: (0,0,0,1)
+
+<MainLayout>
+    BoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+        spacing: 0
+        padding: 0
+
+        BoxLayout:  # head nav
+            orientation: "horizontal"
+            size_hint: (None, None)
+            size: root.width, 100
+            padding: 10
+
+            Label:
+                id: "app name"
+                text: "lighTag"
+                font_size: 20
+
+            Label:
+                id: "head nav spaceholder"
+                text: '                   '
+
+            Button:
+                id: "settings"
+                # text: 'settings'
+                size_hint: (None, None)
+                size: 100, 100
+                background_normal: 'imgs/settings-white.png'
+
+        BoxLayout:  # canvas
+            id: "canvas"
+            orientation: "vertical"
+
+        BoxLayout:  # control panel
+            id: "control panel"
+            orientation: "horizontal"
+            
+            BoxLayout:  # left part
+                orientation: "vertical"
+
+                Button:
+                    id: "add base"
+                    text: "Add Base"
+                    font_size: 18
+                    backgroun_color: utils.get_color_from_hex("#F6F6F6")
+
+                Label:
+                    id: "tag distance"
+                    text: "Tag distance (m)\n" "base1:  3.78\n" "base2:  0.43\n" "base3:  7.01\n" "base4:  5.26\n"
+                    font_size: 12
+
+            BoxLayout:  # right part
+                orientation: "vertical"
+
+                Button:
+                    id: "control panel right part placeholder"
+                    text: "not used"
+                    # size: root.width, root.height
+                    background_color: (0.2, 0.2, 0.2, 1)

@@ -1,25 +1,42 @@
 #:kivy 2.1.0
+
+# set default configuration of all Button widgets
+<Button>
+    font_size: 32
+    background_normal: ''
+    background_color: (0.5, 0.2, 0.1, 1)
+
+<TextInput>
+    background_normal: ''
+    background_color: (0.5, 0.2, 0.8, 1)
+
+<Label> # Label's font_size can rewrite Button's font_size
+    font_size: 15
+
 <MyLayout>
-
     BoxLayout:
+        orientation: "vertical"
         size: root.width, root.height
-        orientation: "vertical" # "horizontal"
-
         spacing: 6
         padding: 10
 
-        Button:
-            text: "Hello world!"
+        Label:
+            id: ''
+            text: "Name"
+        TextInput:
+            multiline: False
+
+        Label:
+            id: ''
+            text: "Password"
+        TextInput:
+            multiline: False
+            password: True
 
         Button:
-            text: "Goodbye world!"
-            size_hint: (None, None)
-            width: 100
-            height: 50
+            text: "Submit"
 
         Button:
-            text: "Good night world!"
-            pos_hint: {'center_x': 0.5}
-            size_hint: (.3, .1) # keep the scale: (width, height)
+            text: "Clear"
 
 

@@ -1,14 +1,12 @@
 from kivy.app import App
-from kivy.uix.label import Label
-from kivy.uix.gridlayout import GridLayout
-
+from kivy.uix.widget import Widget
 from kivy.lang import Builder
 
 # explicitly assign the kv design file with random name
 Builder.load_file("hello.kv")
 
 
-class MyLayout(GridLayout):
+class MyLayout(Widget):
     pass
 
 

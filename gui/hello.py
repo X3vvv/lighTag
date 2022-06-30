@@ -1,8 +1,9 @@
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.lang import Builder
-
 from kivy.core.window import Window
+
+# from kivy.uix.image import Image
 
 # explicitly assign the kv design file with random name
 Builder.load_file("hello.kv")
@@ -14,12 +15,7 @@ class MyLayout(Widget):
 
 class AwesomeApp(App):
     def build(self):
-        Window.clearcolor = (
-            0.2,
-            0.1,
-            0.4,
-            1,
-        )  # can be overwrite by kv design file's setting
+        Window.clearcolor = (1,1,1,1)
         return MyLayout()
 
 

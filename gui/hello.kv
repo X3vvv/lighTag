@@ -1,55 +1,19 @@
 #:kivy 2.1.0
-
-# <Label> # Label's font_size can rewrite Button's font_size if it's below <Button> settings
-#     font_size: 15
-
-# set default configuration of all Button widgets
-<Button>
-    font_size: 32
-    background_normal: ''
-    background_color: (0.5, 0.2, 0.1, 1)
-
-<TextInput>
-    background_normal: ''
-    background_color: (0.5, 0.2, 0.8, 1)
-
-
 <MyLayout>
-    # canvas.before:
-    #     Color:
-    #         rgba: (0.1,0.3,0.2,1)
-    #     Rectangle:
-    #         pos: self.pos
-    #         size: self.size
     BoxLayout:
         orientation: "vertical"
         size: root.width, root.height
         spacing: 6
         padding: 10
 
-        Label:
-            id: ''
-            text: "Name"
-            font_size: 45
-            # label background color
-            background_color: (0.6, 0.8, 0.1, 1)
-            canvas.before:
-                Color:
-                    rgba: self.background_color
-                Rectangle:
-                    size: self.size
-                    pos: self.pos
-            # text properties
-            color: (0.1, 0.1, 0.8, 1)
-            bold: True
-            italic: True
-            outline_color: (0.7, 0.3, 0.1)  # only RGB
-            outline_width: 4
+        Image:
+            source: 'gui\lighTag\imgs\settings-black.png'
 
-        TextInput:
-            multiline: False
+            # below 2 lines can set the image to fill the window
+            # allow_stretch: True
+            # keep_ratio: False
 
         Button:
-            text: "Clear"
+            text: "Submit"
 
 

@@ -1,6 +1,7 @@
 import socket
 import threading
 import re
+import codecs
 
 
 def main():
@@ -16,11 +17,13 @@ def main():
         #msg = bytes.decode('utf8')
         #print(bphero_dispose(msg)+"/n")
         print(bytes.hex())
+        print(convert(bytes.hex().decode()))
         print("/n")
 
 # t = threading.Thread(target=main)
 # t.start()
 
+'''
 def bphero_dispose(string):
     result_dict = {'tag': 0x1005, 'seq': 7, 'time': 1234, 'anthor_count': 4,'anthor': []}
 
@@ -54,6 +57,38 @@ def bphero_dispose(string):
             result_dict['anthor'].append([anthor_id, anthor_dist, anthor_rssi])
         flag = 0
     return result_dict
+'''
 
+def convert(string):
+    string = input("")
+    if ((string[0:2] == "6D") and (string[2:4] == "72")) and ((string[28:30] == "0A") and (string[30:32] == "0D")):
+        arr = []
+        for i in range(0,len(string),2):
+            inStr = string[i:i+2]
+        # m r
+            if (i == 0 or i == 2):
+                binary_str = codecs.decode(inStr, "hex")
+                arr.append(str(binary_str,'utf-8'))
+        # S/N, TAG ID, Frame
+            if (i == 4 or i == 6 or i == 8 or i == 10):
+                arr.append(string[i:i+2])
+        # dis 1.hex -> dec 2. dec/100
+            if (i == 12 or i == 14 or i == 16 or i == 18 or i == 20 or i == 22 or i == 24 or i == 26):
+                inStr = string[i:i+2]
+                inInt = int(inStr, 16)
+                out = inInt/100
+                if (i == 14 or i == 18 or i == 22 or i == 26):
+                    val = inInt << 8
+                    val = val/100
+                    out = val + arr[int(i/2-1)]
+                arr.append(out)
+        # \r \n
+        #else:
+            #arr.append(string[i:i+2])
+        #print(string[i:i+2])
+        return arr[7::2]
+    else: 
+        return -1
 
 main()
+

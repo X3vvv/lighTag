@@ -2,18 +2,25 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.lang import Builder
 from kivy.core.window import Window
-from kivy.uix.floatlayout import FloatLayout
 
 # explicitly assign the kv design file with random name
 Builder.load_file("hello.kv")
 
+
 class MyLayout(Widget):
-    pass
+    def press(self):
+        # create variables for the widget
+        name = self.ids.nameInput.text
+        # print(name)
+
+        # update the label
+        self.ids.nameLabel.text = f"Hello {name}!"
+        self.ids.nameInput.text = ""
+        self.ids.submitButton.text = "Quit"
 
 
 class AwesomeApp(App):
     def build(self):
-        Window.clearcolor = (1,1,1,1)
         return MyLayout()
 
 

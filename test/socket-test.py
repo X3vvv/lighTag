@@ -2,11 +2,24 @@ import socket
 import threading
 import re
 import codecs
+import sympy
+import numpy as np
+
+XA = 0.0
+YA = 0.0
+
+XB = 8.5
+YB = 0.0
+
+XC = 8.5
+YC = 5.0
+
 
 
 def main():
     c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #c.connect(('192.168.0.113', 8234))
+    # c.connect(('192.168.0.113', 8234))
+    # c.close()
     c.bind(('192.168.0.113', 8234))
     #c.sendall("connect server successfully!".encode(encoding='utf8'))
     c.listen(10)
@@ -17,7 +30,12 @@ def main():
         #msg = bytes.decode('utf8')
         #print(bphero_dispose(msg)+"/n")
         print(bytes.hex())
-        print(convert(bytes.hex().decode()))
+        inStr = convert(bytes.hex())
+        if (inStr != -1):
+            print(inStr)
+            print(triposition(XA,YA,inStr[0],XB,YB,inStr[1],XC,YC,inStr[2]))
+        else:
+            print("Error!")
         print("/n")
 
 # t = threading.Thread(target=main)
@@ -60,8 +78,8 @@ def bphero_dispose(string):
 '''
 
 def convert(string):
-    string = input("")
-    if ((string[0:2] == "6D") and (string[2:4] == "72")) and ((string[28:30] == "0A") and (string[30:32] == "0D")):
+    # string = input("")
+    if ((string[0:2] == "6d") and (string[2:4] == "72")) and ((string[28:30] == "0a") and (string[30:32] == "0d")):
         arr = []
         for i in range(0,len(string),2):
             inStr = string[i:i+2]
@@ -89,6 +107,16 @@ def convert(string):
         return arr[7::2]
     else: 
         return -1
+
+
+def triposition(xa,ya,da,xb,yb,db,xc,yc,dc): 
+    x,y = sympy.symbols('x y')
+    f1 = 2*x*(xa-xc)+np.square(xc)-np.square(xa)+2*y*(ya-yc)+np.square(yc)-np.square(ya)-(np.square(dc)-np.square(da))
+    f2 = 2*x*(xb-xc)+np.square(xc)-np.square(xb)+2*y*(yb-yc)+np.square(yc)-np.square(yb)-(np.square(dc)-np.square(db))
+    result = sympy.solve([f1,f2],[x,y])
+    locx,locy = result[x],result[y]
+    return [locx,locy]
+
 
 main()
 

@@ -1,19 +1,33 @@
 #:kivy 2.1.0
+
+<Button>
+    font_size: 32
+    size_hint: (0.333, 0.333)
+
 <MyLayout>
-    BoxLayout:
-        orientation: "vertical"
+
+    FloatLayout:
         size: root.width, root.height
-        spacing: 6
-        padding: 10
-
-        Image:
-            source: 'gui\lighTag\imgs\settings-black.png'
-
-            # below 2 lines can set the image to fill the window
-            # allow_stretch: True
-            # keep_ratio: False
 
         Button:
-            text: "Submit"
+            text: "Top Left"
+            pos_hint: {"x":0, "top":1}  #{'x', 'y', 'top', 'bottom', 'left', 'right'}, each value >=0, <=1
+
+        Button:
+            text: "Top Right"
+            pos_hint: {"right":1, "top":1}
+
+        Button:
+            text: "Top Center"
+            # pos_hint: {"x":0.35, "y":0.35}
+            pos_hint: {"x":0.5-self.size_hint[0]/2, "y":0.5-self.size_hint[0]/2}
+
+        Button:
+            text: "Bottom Left"
+            pos_hint: {"x":0, "bottom":0}
+
+        Button:
+            text: "Bottom Right"
+            pos_hint: {"right":1, "bottom":1}
 
 

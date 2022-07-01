@@ -4,15 +4,25 @@ import re
 import codecs
 import sympy
 import numpy as np
+from numpy import *
+from sympy import symbols, Eq, solve
+
 
 XA = 0.0
 YA = 0.0
+ZA = 2.0
 
-XB = 8.5
+XB = 5.0
 YB = 0.0
+ZB = 2.0
 
-XC = 8.5
+XC = 0.0
 YC = 5.0
+ZC = 2.0
+
+XD = 5.0
+YD = 5.0
+ZD = 3.0
 
 
 
@@ -41,41 +51,6 @@ def main():
 # t = threading.Thread(target=main)
 # t.start()
 
-'''
-def bphero_dispose(string):
-    result_dict = {'tag': 0x1005, 'seq': 7, 'time': 1234, 'anthor_count': 4,'anthor': []}
-
-    # 数据包以&&& 开头
-    res = re.findall(r'&&&', string)
-    flag = 1
-    if len(res) > 0:
-        # step1 print message length,ex 76
-        temp_string = string.split("$")[0]  # &&&:80$
-        data_len = int(temp_string.split(":")[1], 16)
-
-        # tag info
-        temp_string = string.split("$")[1]  # 000A:20
-        tag_id = int(temp_string.split(":")[0], 16)  # 000A
-        tag_seq = int(temp_string.split(":")[1], 16)  # 20
-        # print("标签ID: %02X  Seq: %X" % (tag_id, tag_seq))
-        result_dict['tag'] = tag_id
-        result_dict['seq'] = tag_seq
-
-        # anthor info
-        temp_string = string.split("$")[2]  # 0001:A1B1:11#0002:A2B2:22#0003:A3B3:33#0004:A4B4:44#0005:A5B5:55
-        anthor_count = len(temp_string.split('#'))
-        result_dict['anthor_count'] = anthor_count
-
-        for index in range(anthor_count):
-            anthor_info = temp_string.split('#')[index]  # 0001:A1B1:11
-            anthor_id = int(anthor_info.split(":")[0], 16)
-            anthor_dist = 0.01*int(anthor_info.split(":")[1], 16)   # convert to cm
-            print("Anthor%d Distance = %0.2f m"% (index+1, anthor_dist))
-            anthor_rssi = int(anthor_info.split(":")[2], 16)
-            result_dict['anthor'].append([anthor_id, anthor_dist, anthor_rssi])
-        flag = 0
-    return result_dict
-'''
 
 def convert(string):
     # string = input("")
@@ -118,5 +93,43 @@ def triposition(xa,ya,da,xb,yb,db,xc,yc,dc):
     return [locx,locy]
 
 
-main()
+def quartPosition(xa,ya,za,da,xb,yb,zb,db,xc,yc,zc,dc,xd,yd,zd,dd):    
+    x = symbols('x')
+    y = symbols('y')
+    z = symbols('z')
+    
+    a1 = 2*xa-2*xb
+    a2 = 2*ya-2*yb
+    a3 = 2*za-2*zb
+    
+    a4 = 2*xa-2*xc
+    a5 = 2*ya-2*yc
+    a6 = 2*za-2*zc
+
+    a7 = 2*xa-2*xd
+    a8 = 2*ya-2*yd
+    a9 = 2*za-2*zd
+    
+    b1 = xa*xa-xb*xb+ya*ya-yb*yb+za*za-zb*zb-da*da+db*db
+    b2 = xa*xa-xc*xc+ya*ya-yc*yc+za*za-zc*zc-da*da+dc*dc
+    b3 = xa*xa-xd*xd+ya*ya-yd*yd+za*za-zd*zd-da*da+dd*dd
+
+    f1 = x*a1+y*a2+z*a3-b1
+    f2 = x*a4+y*a5+z*a6-b2
+    f3 = x*a7+y*a8+z*a9-b3
+    out, = sympy.linsolve([f1,f2,f3],[x,y,z])
+    return list(out)
+
+def test():
+    DA = 7.66
+    DB = 7.05
+    DC = 4.09
+    DD = 3.42
+
+    #print(triposition(XA,YA,DA,XB,YB,DB,XC,YC,DC))
+
+    print(quartPosition(XA,YA,ZA,DA,XB,YB,ZB,DB,XC,YC,ZC,DC,XD,YD,ZD,DD))
+
+# main()
+test()
 

@@ -2,6 +2,7 @@ import socket
 import threading
 import re
 import codecs
+import timeit
 import sympy
 import numpy as np
 from numpy import *
@@ -43,7 +44,7 @@ def main():
         inStr = convert(bytes.hex())
         if (inStr != -1):
             print(inStr)
-            print(triposition(XA,YA,inStr[0],XB,YB,inStr[1],XC,YC,inStr[2]))
+            print(triposition(XA,YA,inStr[0],XB,YB,inStr[1],XC,YC,inStr[2])) #tag 和 base 的距离
         else:
             print("Error!")
         print("/n")
@@ -66,11 +67,11 @@ def convert(string):
             if (i == 4 or i == 6 or i == 8 or i == 10):
                 arr.append(string[i:i+2])
         # dis 1.hex -> dec 2. dec/100
-            if (i == 12 or i == 14 or i == 16 or i == 18 or i == 20 or i == 22 or i == 24 or i == 26):
+            if (i == 12 or i == 14 or i == 16 or i == 18 or i == 20 or i == 22 or i == 24 or i == 26): #高八位
                 inStr = string[i:i+2]
-                inInt = int(inStr, 16)
+                inInt = int(inStr, 16) #转成十进制
                 out = inInt/100
-                if (i == 14 or i == 18 or i == 22 or i == 26):
+                if (i == 14 or i == 18 or i == 22 or i == 26): #低八位
                     val = inInt << 8
                     val = val/100
                     out = val + arr[int(i/2-1)]
@@ -93,7 +94,7 @@ def triposition(xa,ya,da,xb,yb,db,xc,yc,dc):
     return [locx,locy]
 
 
-def quartPosition(xa,ya,za,da,xb,yb,zb,db,xc,yc,zc,dc,xd,yd,zd,dd):    
+def quartPosition(xa,ya,za,da,xb,yb,zb,db,xc,yc,zc,dc,xd,yd,zd,dd): #四组base   
     x = symbols('x')
     y = symbols('y')
     z = symbols('z')
@@ -114,10 +115,11 @@ def quartPosition(xa,ya,za,da,xb,yb,zb,db,xc,yc,zc,dc,xd,yd,zd,dd):
     b2 = xa*xa-xc*xc+ya*ya-yc*yc+za*za-zc*zc-da*da+dc*dc
     b3 = xa*xa-xd*xd+ya*ya-yd*yd+za*za-zd*zd-da*da+dd*dd
 
+    #解方程
     f1 = x*a1+y*a2+z*a3-b1
     f2 = x*a4+y*a5+z*a6-b2
     f3 = x*a7+y*a8+z*a9-b3
-    out, = sympy.linsolve([f1,f2,f3],[x,y,z])
+    out, = sympy.linsolve([f1,f2,f3],[x,y,z]) #tuple
     return list(out)
 
 def test():
@@ -132,4 +134,5 @@ def test():
 
 # main()
 test()
+
 

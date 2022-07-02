@@ -88,11 +88,11 @@ def decode(string):
             if (i == 4 or i == 6 or i == 8 or i == 10):
                 arr.append(string[i:i+2])
         # dis 1.hex -> dec 2. dec/100
-            if (i == 12 or i == 14 or i == 16 or i == 18 or i == 20 or i == 22 or i == 24 or i == 26):
+            if (i == 12 or i == 14 or i == 16 or i == 18 or i == 20 or i == 22 or i == 24 or i == 26): #高八位
                 inStr = string[i:i+2]
-                inInt = int(inStr, 16)
+                inInt = int(inStr, 16) #转成十进制
                 out = inInt/100
-                if (i == 14 or i == 18 or i == 22 or i == 26):
+                if (i == 14 or i == 18 or i == 22 or i == 26): #低八位
                     val = inInt << 8
                     val = val/100
                     out = val + arr[int(i/2-1)]

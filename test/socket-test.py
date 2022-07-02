@@ -6,6 +6,7 @@ import sympy
 import numpy as np
 from numpy import *
 from sympy import symbols, Eq, solve
+import timeit
 
 
 XA = 0.0
@@ -121,15 +122,16 @@ def quartPosition(xa,ya,za,da,xb,yb,zb,db,xc,yc,zc,dc,xd,yd,zd,dd):
     return list(out)
 
 def test():
-    DA = 7.66
-    DB = 7.05
-    DC = 4.09
-    DD = 3.42
+    DA = 5.83
+    DB = 5.39
+    DC = 4.36
+    DD = 3.0
 
-    #print(triposition(XA,YA,DA,XB,YB,DB,XC,YC,DC))
+    triposition(XA,YA,DA,XB,YB,DB,XC,YC,DC)
 
-    print(quartPosition(XA,YA,ZA,DA,XB,YB,ZB,DB,XC,YC,ZC,DC,XD,YD,ZD,DD))
+    quartPosition(XA,YA,ZA,DA,XB,YB,ZB,DB,XC,YC,ZC,DC,XD,YD,ZD,DD)
 
 # main()
-test()
+# test()
 
+print(timeit.timeit("test()", setup="from __main__ import test",number=100))

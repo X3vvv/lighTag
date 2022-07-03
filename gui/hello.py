@@ -1,67 +1,40 @@
-from re import MULTILINE
-import kivy
 from kivy.app import App
+from kivy.uix.widget import Widget
+from kivy.lang import Builder
+from kivy.core.window import Window
 
-from kivy.uix.label import Label
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
+# set the window size
+Window.size = (500, 700)
 
-class MyGridLayout(GridLayout):
-    # Initialize infinite keywords
-    def __init__(self, **kwargs):
-        # Call grid layout constructor
-        super(MyGridLayout, self).__init__(**kwargs)
+# explicitly assign the kv design file with random name
+Builder.load_file("hello.kv")
 
-        # Set columns
-        self.cols = 1
 
-        # Create a second grid layout
-        self.top_grid = GridLayout()
-        self.top_grid.cols = 2
+class MyLayout(Widget):
 
-        # Add the second grid layout to the screen
-        self.add_widget(self.top_grid)
+    current_action = ""
 
-        # Add username input box
-        self.top_grid.add_widget(Label(text="Username: "))
-        self.name = TextInput(multiline=False)
-        self.top_grid.add_widget(self.name)
+    def clear(self):
+        self.ids.calcInput.text = "0"
 
-        # Add password input box
-        self.top_grid.add_widget(Label(text="Password: "))
-        self.pwd = TextInput(multiline=False, password=True)
-        self.top_grid.add_widget(self.pwd)
+    def button_press(self, button):
+        content = self.ids.calcInput.text
 
-        # Create submit button
-        self.submit = Button(text="Submit", font_size=32)
-        # Bind the button
-        self.submit.bind(on_press=self.press)
-        self.add_widget(self.submit)
-
-    def press(self, instance):
-        # Function of the submit button
-        name = self.name.text
-        pwd = self.pwd.text
-
-        # print("Hello {}, your password is: {}".format(name, pwd))
-
-        # Print info to screen
-        if name.strip() == '' or pwd.strip() == '':
-            msg = "Error: must fill the username and password"
+        if content == "0":
+            self.ids.calcInput.text = button
         else:
-            msg = "Hello {}, your password is: {}".format(name, pwd)
-            # Clear the input boxes
-            self.name.text = ''
-            self.pwd.text = ''
-        self.add_widget(Label(text=msg))
+            self.ids.calcInput.text = content + button
+
+    def add(self):
+        content = self.ids.calcInput.text
+
+        self.ids.calcInput.text += "+"
 
 
-
-
-class MyApp(App):
+class AwesomeApp(App):
     def build(self):
-        return MyGridLayout()
+        return MyLayout()
 
-if __name__ == '__main__':
-    MyApp().run()
+
+if __name__ == "__main__":
+    AwesomeApp().run()

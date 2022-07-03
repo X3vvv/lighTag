@@ -23,7 +23,12 @@ ZC = 2.0
 
 XD = 5.0
 YD = 5.0
-ZD = 3.0 ### the 
+ZD = 3.0 
+'''
+Note that if all four z-coordinates are the same, 
+then the x, y and z of the fourth point can be directly implied, 
+so the fourth z should be different in order to form a 3D-perceived environment
+'''
 
 
 

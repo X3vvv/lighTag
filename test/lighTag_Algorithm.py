@@ -158,4 +158,4 @@ def test():
 # main()
 # test()
 
-print(timeit.timeit("test()", setup="from __main__ import test",number=100))
+print(timeit.timeit("test()", setup="from __main__ import test", number=100))

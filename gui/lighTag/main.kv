@@ -1,55 +1,89 @@
 #:kivy 2.1.0
 #:import utils kivy.utils
 
-<Label>
-    font_size: 25
-    background_normal: ''
-    background_color: (0,0,0,1)
-
-<Button>
-    background_normal: ''
-    background_color: utils.get_color_from_hex("#1e81b0")
-
-<TextInput>
-    background_normal: ''
-    background_color: (0,0,0,1)
-
 <MainLayout>
     BoxLayout:
         orientation: "vertical"
         size: root.width, root.height
-        spacing: 0
-        padding: 0
 
-        BoxLayout:  # head nav
+        # head nav
+        BoxLayout:
+            # background_color
+            canvas:
+                Color:
+                    rgba: (180/255, 180/255, 180/255, 1)
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+
             orientation: "horizontal"
-            size_hint: (None, None)
-            size: root.width, 100
-            padding: 10
+            size_hint: (1, None)
+            height: 60
+            padding: 20
 
             Label:
-                id: "app name"
+                id: app_name_label
                 text: "lighTag"
-                font_size: 20
+                font_size: 18
+                size_hint: (.4, 1)  # for width, the proportion is relative to half of the parent's width if there are 2 widgets in this horizontal box
+                color: 0,0,0,1
+
+                # set text alignment
+                text_size: self.size
+                halign: 'left'
+                valign: 'middle'
+                
+                # set background_color
+                # canvas.before:
+                #     Color:
+                #         rgba: (122/255, 0, 133/255, 1)
+                #     Rectangle:
+                #         size: self.size
+                #         pos: self.pos
 
             Label:
-                id: "head nav spaceholder"
-                text: '                   '
+                id: head_nav_spaceholder
+                text: ''
+                # canvas.before:
+                #     Color:
+                #         rgba: (50/255, 50/255, 50/255, 1)
+                #     Rectangle:
+                #         size: self.size
+                #         pos: self.pos
 
-            Button:
-                id: "settings"
-                # text: 'settings'
-                size_hint: (None, None)
-                size: 100, 100
-                background_normal: 'imgs/settings-white.png'
+            # Button:
+            #     id: settings_btn
+            #     size_hint: (.1, 1)
+            #     background_color: (0, 0, 0, 0)
+
+            #     on_press: root.settings_on()
+            #     on_release: root.settings_off()
+
+            #     Image:
+            #         id: settings_img
+            #         source: "imgs/settings-outline.png"
+            #         center_x: self.parent.center_x
+            #         center_y: self.parent.center_y
+            #         size: self.parent.size
 
         BoxLayout:  # canvas
             id: "canvas"
             orientation: "vertical"
+            Label:
+                text: "Canvas"
+                background_color: (255/255, 157/255, 0/255, 1)
+                canvas.before:
+                    Color:
+                        rgba: self.background_color
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
 
         BoxLayout:  # control panel
             id: "control panel"
             orientation: "horizontal"
+            size_hint: (1, None)
+            height: 250
             
             BoxLayout:  # left part
                 orientation: "vertical"

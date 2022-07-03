@@ -81,6 +81,22 @@
                         size: self.size
                         pos: self.pos
 
+            Label:
+                id: canvas_size_label
+                text: '{}cm x {}cm '.format(*canvas_temp_label.size)
+                font_size: 12
+                size_hint: (None, None)
+                size: self.texture_size
+                pos_hint: {'top': 1, 'right': 1}
+                # canvas.before:
+                #     Color:
+                #         rgba: (105/255, 157/255, 110/255, 1)
+                #     Rectangle:
+                #         size: self.size
+                #         pos: self.pos
+
+
+
 
         BoxLayout:  # control panel
             id: "control panel"

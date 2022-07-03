@@ -23,7 +23,7 @@ ZC = 2.0
 
 XD = 5.0
 YD = 5.0
-ZD = 3.0
+ZD = 3.0 ### the 
 
 
 
@@ -71,7 +71,7 @@ def convert(inStr):
             
             # m r
             if (i == 0 or i == 2):
-                binary_str = codecs.decode(inStr, "hex")
+                binary_str = codecs.decode(inStr, "hex") # hex to ASCII code
                 arr.append(str(binary_str,'utf-8'))
                 
             # S/N, TAG ID, Frame

@@ -66,18 +66,21 @@
             #         center_y: self.parent.center_y
             #         size: self.parent.size
 
-        BoxLayout:  # canvas
-            id: "canvas"
-            orientation: "vertical"
+        FloatLayout:  # canvas
+            id: canvas
+            # size: root.width, root.height
+            # pos_hint: {'center_x': .5}
             Label:
+                id: canvas_temp_label
                 text: "Canvas"
-                background_color: (255/255, 157/255, 0/255, 1)
+                pos_hint: {'center_x': .5, 'center_y': .5}
                 canvas.before:
                     Color:
-                        rgba: self.background_color
+                        rgba: (255/255, 157/255, 0/255, 1)
                     Rectangle:
                         size: self.size
                         pos: self.pos
+
 
         BoxLayout:  # control panel
             id: "control panel"
@@ -93,6 +96,7 @@
                     text: "Add Base"
                     font_size: 18
                     backgroun_color: utils.get_color_from_hex("#F6F6F6")
+                    on_release: root.add_base()
 
                 Label:
                     id: "tag distance"

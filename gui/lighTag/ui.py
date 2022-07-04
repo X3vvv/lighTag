@@ -23,6 +23,8 @@ from kivy.clock import Clock
 from kivy.graphics import Line, Color
 
 
+print("Starts to connect socket.")
+
 c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 c.bind(
     ("192.168.0.119", 8234)
@@ -30,6 +32,7 @@ c.bind(
 c.listen(10)
 client, address = c.accept()
 
+print("Socket connected.")
 
 def iot_callback(duration_after_last_call):
     global inDisArr, tri
@@ -57,6 +60,7 @@ def iot_callback(duration_after_last_call):
 
 
 Clock.schedule_interval(iot_callback, 0.5)
+print("Kivy clock callback added.")
 
 
 class Base:

@@ -7,6 +7,8 @@ from numpy import *
 from sympy import symbols, Eq, solve
 import timeit
 
+import ui
+
 
 # Four Base Station Coordinates
 XA = 0.0
@@ -46,6 +48,9 @@ def main():
     )  ### !!! May encounter error if the port is already used, pending to fix !!!
     c.listen(10)
     client, address = c.accept()
+
+    ui.UIApp().run()
+
     while True:
         bytes = client.recv(1024)  # Receive bytes from WIFI
         print(bytes.hex())

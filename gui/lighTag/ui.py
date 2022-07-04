@@ -178,10 +178,21 @@ class MainLayout(Widget):
         if len(self.bases) <= 0:
             print("No base yet.")
 
+    def update_label_dist(self, arr):
+        print(arr)
+
+    def update_label_pos(self, arr):
+        print(arr)
+
+
+def hello():
+    print("Hello")
+
 
 class UIApp(App):
     def build(self):
-        return MainLayout()
+        self.main = MainLayout()
+        return self.main
 
 
 if __name__ == "__main__":

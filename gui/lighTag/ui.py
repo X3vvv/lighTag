@@ -1,14 +1,6 @@
 from typing import Tuple
 import lighTag_Algorithm as lt
-
 import socket
-import codecs
-import timeit
-import sympy
-import numpy as np
-from numpy import *
-from sympy import symbols, Eq, solve
-import timeit
 
 from kivy import Config
 
@@ -36,19 +28,17 @@ c.bind(
 c.listen(10)
 client, address = c.accept()
 
-inDisArr = 0
-tri = 0
-
 
 def iot_callback(duration_after_last_call):
+    global inDisArr, tri
     bytes = client.recv(1024)  # Receive bytes from WIFI
-    print(bytes.hex())
+    # print(bytes.hex())
     inDisArr = lt.getDis(
         bytes.hex()
     )  # Convert bytes to hex string and get the distance data
 
     if inDisArr != -1:
-        print(inDisArr)
+        # print(inDisArr)
         tri = lt.triPosition(
             lt.XA,
             lt.YA,

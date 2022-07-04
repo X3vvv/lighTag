@@ -1,13 +1,8 @@
 import socket
 import codecs
-import timeit
 import sympy
 import numpy as np
 from numpy import *
-from sympy import symbols, Eq, solve
-import timeit
-
-import ui
 
 
 # Four Base Station Coordinates
@@ -49,9 +44,6 @@ def main():
     c.listen(10)
     client, address = c.accept()
 
-    app = ui.UIApp()
-    app.run()
-
     while True:
         bytes = client.recv(1024)  # Receive bytes from WIFI
         print(bytes.hex())
@@ -59,17 +51,12 @@ def main():
             bytes.hex()
         )  # Convert bytes to hex string and get the distance data
 
-        app.main.update_label_dist(inDisArr)
-
         if inDisArr != -1:
             print(inDisArr)
             tri = triPosition(
                 XA, YA, inDisArr[0], XB, YB, inDisArr[1], XC, YC, inDisArr[2]
             )
             print(tri)  # Calculate the 2D location of the tag
-
-            app.main.update_label_pos(tri)
-
             print(
                 quartPosition(
                     XA,

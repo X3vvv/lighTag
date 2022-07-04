@@ -222,8 +222,8 @@ class MainLayout(Widget):
             print("No base yet.")
 
         # print(inDisArr, tri)
-        print("Draw a circle at:", tri)
-        self.draw_a_circle(*tri)
+        print("Draw a circle at: ({}, {})...", tri[0], tri[1] + 250)
+        self.draw_a_circle(tri[0], tri[1] + 250)
         print("Finish drawing!")
         # print("Starting schedule callbacks, interval: 1s")
         # Clock.schedule_interval(self.draw_a_circle(*tri), 1)
@@ -233,7 +233,7 @@ class MainLayout(Widget):
             Color(0.9, 0.1, 0.1, 0.9)
             Line(
                 width=2,
-                circle=(x, y + 250, 1),
+                circle=(x, y, 1),
             )
 
     # def update_label_dist(self, arr):

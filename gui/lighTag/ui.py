@@ -20,6 +20,8 @@ from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.clock import Clock
+from kivy.graphics import Line, Color
+
 
 c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 c.bind(
@@ -52,7 +54,6 @@ def iot_callback(duration_after_last_call):
         )
     else:
         print("Error!")
-    print("/n")
 
 
 Clock.schedule_interval(iot_callback, 0.5)
@@ -216,7 +217,19 @@ class MainLayout(Widget):
         if len(self.bases) <= 0:
             print("No base yet.")
 
-        print(inDisArr, tri)
+        # print(inDisArr, tri)
+        print("Draw a circle")
+        self.draw_a_circle(*tri)
+        print("Starting schedule callbacks, interval: 1s")
+        Clock.schedule_interval(self.draw_a_circle(*tri), 1)
+
+    def draw_a_circle(self, x, y):
+        with self.ids.canvas.canvas:
+            Color(0.9, 0.1, 0.1, 0.9)
+            Line(
+                width=2,
+                circle=(x, y + 250, 0.2),
+            )
 
     # def update_label_dist(self, arr):
     #     print("UI:", arr)

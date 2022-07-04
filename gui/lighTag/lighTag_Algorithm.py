@@ -49,7 +49,8 @@ def main():
     c.listen(10)
     client, address = c.accept()
 
-    ui.UIApp().run()
+    app = ui.UIApp()
+    app.run()
 
     while True:
         bytes = client.recv(1024)  # Receive bytes from WIFI
@@ -57,13 +58,17 @@ def main():
         inDisArr = getDis(
             bytes.hex()
         )  # Convert bytes to hex string and get the distance data
+
+        app.main.update_label_dist(inDisArr)
+
         if inDisArr != -1:
             print(inDisArr)
-            print(
-                triPosition(
-                    XA, YA, inDisArr[0], XB, YB, inDisArr[1], XC, YC, inDisArr[2]
-                )
-            )  # Calculate the 2D location of the tag
+            tri = triPosition(
+                    XA, YA, inDisArr[0], XB, YB, inDisArr[1], XC, YC, inDisArr[2])
+            print(tri)  # Calculate the 2D location of the tag
+
+            app.main.update_label_pos(tri)
+
             print(
                 quartPosition(
                     XA,

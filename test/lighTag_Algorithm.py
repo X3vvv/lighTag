@@ -13,17 +13,17 @@ XA = 0.0
 YA = 0.0
 ZA = 2.0
 
-XB = 5.0
-YB = 0.0
+XB = 0.0
+YB = 4.3
 ZB = 2.0
 
-XC = 0.0
-YC = 5.0
+XC = 5.7
+YC = 4.3
 ZC = 2.0
 
-XD = 5.0
-YD = 5.0
-ZD = 3.0 
+XD = 5.7
+YD = -4.4
+ZD = 1.5
 '''
 Note that if all four z-coordinates are the same, 
 then the x, y and z of the fourth point can be directly implied, 
@@ -40,13 +40,14 @@ def main():
         3. Call triPosition()/quartPosition() function to calculate the 2D/3D location of the tag
     """
     c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # c.connect(('192.168.0.113', 8234))
+    #c.connect(('192.168.0.119', 8234))
     # c.close()
-    c.bind(('192.168.0.113', 8234)) ### !!! May encounter error if the port is already used, pending to fix !!!
+    c.bind(('192.168.0.119', 8234)) ### !!! May encounter error if the port is already used, pending to fix !!!
     c.listen(10)
     client, address = c.accept()
     while True:
         bytes = client.recv(1024) # Receive bytes from WIFI
+        print(bytes.hex())
         inDisArr = getDis(bytes.hex()) # Convert bytes to hex string and get the distance data
         if (inDisArr != -1):
             print(inDisArr)
@@ -72,11 +73,11 @@ def getDis(inStr):
     if ((inStr[0:2] == "6d") and (inStr[2:4] == "72")) and ((inStr[28:30] == "0a") and (inStr[30:32] == "0d")):
         arr = []
         for i in range(0,len(inStr),2):
-            inStr = inStr[i:i+2]
+            str_1 = inStr[i:i+2]
             
             # m r
             if (i == 0 or i == 2):
-                binary_str = codecs.decode(inStr, "hex") # hex to ASCII code
+                binary_str = codecs.decode(str_1, "hex") # hex to ASCII code
                 arr.append(str(binary_str,'utf-8'))
                 
             # S/N, TAG ID, Frame
@@ -85,8 +86,8 @@ def getDis(inStr):
                 
             # dis 1.hex -> dec 2. dec/100
             if (i == 12 or i == 14 or i == 16 or i == 18 or i == 20 or i == 22 or i == 24 or i == 26): # High 8 bits (2 bytes)
-                inStr = inStr[i:i+2] # Get the 2 bytes
-                inInt = int(inStr, 16) # hex to dec
+                s = inStr[i:i+2] # Get the 2 bytes
+                inInt = int(s,16) # hex to dec
                 out = inInt/100 # Get real distance
                 if (i == 14 or i == 18 or i == 22 or i == 26): # Low 8 bits (2 bytes)
                     val = inInt << 8 # Shift 8 bits to left
@@ -155,7 +156,7 @@ def test():
     triPosition(XA,YA,DA,XB,YB,DB,XC,YC,DC)
     quartPosition(XA,YA,ZA,DA,XB,YB,ZB,DB,XC,YC,ZC,DC,XD,YD,ZD,DD)
 
-# main()
+main()
 # test()
 
-print(timeit.timeit("test()", setup="from __main__ import test", number=100))
+#print(timeit.timeit("test()", setup="from __main__ import test", number=100))

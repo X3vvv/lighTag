@@ -1,6 +1,7 @@
 from typing import Tuple
 import lighTag_Algorithm as lt
-import socket
+import serial
+import serial.tools.list_ports
 
 
 from kivy import Config
@@ -23,25 +24,45 @@ from kivy.clock import Clock
 from kivy.graphics import Line, Color
 
 
-print("Starts to connect socket.")
+# print("Starts to connect socket.")
 
-c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-c.bind(
-    ("192.168.0.119", 8234)
-)  ### !!! May encounter error if the port is already used, pending to fix !!!
-c.listen(10)
-client, address = c.accept()
+# c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# c.bind(
+#     ("192.168.0.119", 8234)
+# )  ### !!! May encounter error if the port is already used, pending to fix !!!
+# c.listen(10)
+# client, address = c.accept()
 
-print("Socket connected.")
+# print("Socket connected.")
+
+ser = serial.Serial("/dev/cu.usbserial-110", 115200)    # 打开COM17，将波特率配置为115200，其余参数使用默认值
+if ser.isOpen():                        # 判断串口是否成功打开
+    print("打开串口成功。")
+    print(ser.name)    # 输出串口号
+else:
+    print("打开串口失败。")
+
+ser = serial.Serial(port="/dev/cu.usbserial-110",
+                    baudrate=115200,
+                    bytesize=serial.SEVENBITS,
+                    parity=serial.PARITY_NONE,
+                    stopbits=serial.STOPBITS_TWO,
+                    timeout=0.5) 
+
+
 
 
 def iot_callback(duration_after_last_call):
     global inDisArr, tri
-    bytes = client.recv(1024)  # Receive bytes from WIFI
-    # print(bytes.hex())
+    com_input = ser.read(16)
+    bytes = com_input
+    # bytes = client.recv(1024)  # Receive bytes from WIFI
+    print("Received bytes:", bytes.hex())
     inDisArr = lt.getDis(
-        bytes.hex()
+        bytes.hex()[0:32]
     )  # Convert bytes to hex string and get the distance data
+
+    print("After getDis", inDisArr)
 
     if inDisArr != -1:
         # print(inDisArr)
@@ -57,7 +78,7 @@ def iot_callback(duration_after_last_call):
             inDisArr[2],
         )
     else:
-        print("Error!")
+        print("Distance Error!")
 
 
 Clock.schedule_interval(iot_callback, 0.5)

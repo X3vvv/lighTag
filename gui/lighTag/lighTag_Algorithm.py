@@ -37,14 +37,14 @@ def main():
     2. Call getDis() function to convert received data to distance data
     3. Call triPosition()/quartPosition() function to calculate the 2D/3D location of the tag
     """
-    c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # c.connect(('192.168.0.119', 8234))
-    # c.close()
-    c.bind(
-        ("192.168.0.119", 8234)
-    )  ### !!! May encounter error if the port is already used, pending to fix !!!
-    c.listen(10)
-    client, address = c.accept()
+    # c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # # c.connect(('192.168.0.119', 8234))
+    # # c.close()
+    # c.bind(
+    #     ("192.168.0.119", 8234)
+    # )  ### !!! May encounter error if the port is already used, pending to fix !!!
+    # c.listen(10)
+    # client, address = c.accept()
     
     
     # ports_list = list(serial.tools.list_ports.comports())
@@ -73,7 +73,7 @@ def main():
     #ser.close()
 
     while True:
-        com_input = ser.read(1024)  
+        com_input = ser.read(32)  
         bytes = com_input
         #bytes = client.recv(1024)  # Receive bytes from WIFI
         print(bytes.hex())
@@ -81,7 +81,7 @@ def main():
             bytes.hex()
         )  # Convert bytes to hex string and get the distance data
 
-        if inDisArr != -1:
+        if 1:
             print(inDisArr)
             tri = triPosition(
                 XA, YA, inDisArr[0], XB, YB, inDisArr[1], XC, YC, inDisArr[2]
@@ -108,8 +108,8 @@ def main():
                 )
             )  # Calculate the 3D location of the tag
         else:
-            print("Error!")
-        print("/n")
+            print("Distance Error!")
+        print("\n")
 
 
 def getDis(inStr):

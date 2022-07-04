@@ -1,4 +1,4 @@
-from hashlib import new
+from faulthandler import disable
 from typing import Tuple
 
 from kivy import Config
@@ -18,8 +18,6 @@ from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
-
-ONE_CENTIMETER = 1  # 1 in kivy size unit
 
 
 class Base:
@@ -46,7 +44,7 @@ class Base:
             on_release=self._on_add_base_released,
         )
 
-    def move_pos(self, ori_pos: Tuple(float, float), move_dist: Tuple(float, float)):
+    def move_pos(self, ori_pos: Tuple[float, float], move_dist: Tuple[float, float]):
         return (ori_pos[0] + move_dist[0], ori_pos[1] + move_dist[1])
 
     def update_pos(self, new_pos):
@@ -57,6 +55,8 @@ class Base:
 class MainLayout(Widget):
     num_of_base = 0
     focused_base = None
+    bases = []
+    CENTIMETER_PER_PIXEL = 1  # how many centimeters a kivy pixel represents
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -69,6 +69,7 @@ class MainLayout(Widget):
         self.ids.settings_img.source = "imgs/settings-outline.png"
 
     def add_base(self):
+        """Callback function for adding a base button to the canvas."""
         base_id = self.num_of_base + 1
         new_base = Button(
             text=str(base_id),
@@ -77,31 +78,31 @@ class MainLayout(Widget):
             size=(17, 17),
             # pos_hint={"x": 0.5, "y": 0.5},
             pos=(0, 250),  # pos of left-bottom corner of the button
-            on_release=self._on_add_base_released,
+            on_release=self._on_base_released,
         )
+        self.bases.append(new_base)
         canvas = self.ids.canvas
         canvas.add_widget(new_base)
         self.num_of_base += 1
 
-    def _on_add_base_released(self, base_btn):
-        # self.focused_base =
-        self.ids.canvas.add_widget(self._create_base_popup(base_btn))
-        # print(base_btn)
+    def _on_base_released(self, base_btn):
+        """Callback function for when the base button is released. A popup window will be created."""
 
-    def _create_base_popup(self, base_btn):
         def popup_confirm(confirm_btn):
             # print(confirm_btn)
             x = float(base_x.text)
             y = float(base_y.text)
             z = float(base_z.text)
             print(x, y, z)
-            x = 0 if x <= 0 else x
-            y = (
-                self.ids.control_panel.height
-                if y < self.ids.control_panel.height
-                else y
-            )
-            base_btn.pos = [x, y]
+            if x < 0:
+                x = 0
+            elif x > self.ids.canvas_temp_label.size[0] - 17:
+                x = self.ids.canvas_temp_label.size[0] - 17
+            if y < 0:
+                y = 0
+            elif y > self.ids.canvas_temp_label.size[1] - 17:
+                y = self.ids.canvas_temp_label.size[1] - 17
+            base_btn.pos = [x, y + 250]
             self.ids.canvas.remove_widget(popup)
 
         def delete_base(delete_btn):
@@ -157,6 +158,7 @@ class MainLayout(Widget):
                 size_hint=(1, 0.45),
                 color=(1, 30 / 255, 30 / 255, 1),
                 on_release=delete_base,
+                disabled=True,
             )
         )
 
@@ -168,13 +170,19 @@ class MainLayout(Widget):
             pos_hint={"center_x": 0.5, "center_y": 0.5},
         )
 
-        return popup
+        self.ids.canvas.add_widget(popup)
+
+    def debug(self):
+        for i in range(len(self.bases)):
+            print("base[{}]: {}]".format(i, self.bases[i].pos))
+        if len(self.bases) <= 0:
+            print("No base yet.")
 
 
-class MainApp(App):
+class UIApp(App):
     def build(self):
         return MainLayout()
 
 
 if __name__ == "__main__":
-    MainApp().run()
+    UIApp().run()

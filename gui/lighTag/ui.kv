@@ -83,7 +83,7 @@
 
             Label:
                 id: canvas_size_label
-                text: '{}cm x {}cm '.format(*canvas_temp_label.size)
+                text: '{}cm x {}cm '.format(canvas_temp_label.size[0] / root.CENTIMETER_PER_PIXEL, canvas_temp_label.size[1] / root.CENTIMETER_PER_PIXEL)
                 font_size: 12
                 size_hint: (None, None)
                 size: self.texture_size
@@ -127,3 +127,4 @@
                     text: "not used"
                     # size: root.width, root.height
                     background_color: (0.2, 0.2, 0.2, 1)
+                    on_release: root.debug()

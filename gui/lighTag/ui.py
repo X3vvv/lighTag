@@ -11,7 +11,6 @@ Config.set("graphics", "minimum_width", "450")
 Config.set("graphics", "minimum_height", "750")
 
 from kivy.app import App
-from kivy.core.window import Window
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
@@ -33,6 +32,7 @@ c.listen(10)
 client, address = c.accept()
 
 print("Socket connected.")
+
 
 def iot_callback(duration_after_last_call):
     global inDisArr, tri
@@ -222,10 +222,11 @@ class MainLayout(Widget):
             print("No base yet.")
 
         # print(inDisArr, tri)
-        print("Draw a circle")
+        print("Draw a circle at:", tri)
         self.draw_a_circle(*tri)
-        print("Starting schedule callbacks, interval: 1s")
-        Clock.schedule_interval(self.draw_a_circle(*tri), 1)
+        print("Finish drawing!")
+        # print("Starting schedule callbacks, interval: 1s")
+        # Clock.schedule_interval(self.draw_a_circle(*tri), 1)
 
     def draw_a_circle(self, x, y):
         with self.ids.canvas.canvas:

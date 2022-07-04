@@ -24,6 +24,7 @@ from kivy.clock import Clock
 from kivy.graphics import Line, Color
 
 
+# For WIFI
 print("Starts to connect socket.")
 
 c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,7 +35,9 @@ c.listen(10)
 client, address = c.accept()
 
 print("Socket connected.")
+######
 
+# For serial port
 # ser = serial.Serial("/dev/cu.usbserial-110", 115200)    # 打开COM17，将波特率配置为115200，其余参数使用默认值
 # if ser.isOpen():                        # 判断串口是否成功打开
 #     print("打开串口成功。")
@@ -49,13 +52,13 @@ print("Socket connected.")
 #                     stopbits=serial.STOPBITS_TWO,
 #                     timeout=0.5) 
 
+######
 
 
 
 def iot_callback(duration_after_last_call):
     global inDisArr, tri
-    # com_input = ser.read(16)
-    # bytes = com_input
+    # bytes = ser.read(16) # For serial port
     bytes = client.recv(1024)  # Receive bytes from WIFI
     print("Received bytes:", bytes.hex())
     inDisArr = lt.getDis(

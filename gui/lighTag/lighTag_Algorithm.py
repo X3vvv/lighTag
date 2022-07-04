@@ -64,7 +64,8 @@ def main():
         if inDisArr != -1:
             print(inDisArr)
             tri = triPosition(
-                    XA, YA, inDisArr[0], XB, YB, inDisArr[1], XC, YC, inDisArr[2])
+                XA, YA, inDisArr[0], XB, YB, inDisArr[1], XC, YC, inDisArr[2]
+            )
             print(tri)  # Calculate the 2D location of the tag
 
             app.main.update_label_pos(tri)

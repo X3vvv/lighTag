@@ -1,5 +1,14 @@
-from faulthandler import disable
 from typing import Tuple
+import lighTag_Algorithm as lt
+
+import socket
+import codecs
+import timeit
+import sympy
+import numpy as np
+from numpy import *
+from sympy import symbols, Eq, solve
+import timeit
 
 from kivy import Config
 
@@ -18,6 +27,45 @@ from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
+from kivy.clock import Clock
+
+c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+c.bind(
+    ("192.168.0.119", 8234)
+)  ### !!! May encounter error if the port is already used, pending to fix !!!
+c.listen(10)
+client, address = c.accept()
+
+inDisArr = 0
+tri = 0
+
+
+def iot_callback(duration_after_last_call):
+    bytes = client.recv(1024)  # Receive bytes from WIFI
+    print(bytes.hex())
+    inDisArr = lt.getDis(
+        bytes.hex()
+    )  # Convert bytes to hex string and get the distance data
+
+    if inDisArr != -1:
+        print(inDisArr)
+        tri = lt.triPosition(
+            lt.XA,
+            lt.YA,
+            inDisArr[0],
+            lt.XB,
+            lt.YB,
+            inDisArr[1],
+            lt.XC,
+            lt.YC,
+            inDisArr[2],
+        )
+    else:
+        print("Error!")
+    print("/n")
+
+
+Clock.schedule_interval(iot_callback, 0.5)
 
 
 class Base:
@@ -178,21 +226,18 @@ class MainLayout(Widget):
         if len(self.bases) <= 0:
             print("No base yet.")
 
-    def update_label_dist(self, arr):
-        print(arr)
+        print(inDisArr, tri)
 
-    def update_label_pos(self, arr):
-        print(arr)
+    # def update_label_dist(self, arr):
+    #     print("UI:", arr)
 
-
-def hello():
-    print("Hello")
+    # def update_label_pos(self, arr):
+    #     print("UI:", arr)
 
 
 class UIApp(App):
     def build(self):
-        self.main = MainLayout()
-        return self.main
+        return MainLayout()
 
 
 if __name__ == "__main__":

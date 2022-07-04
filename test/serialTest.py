@@ -1,5 +1,6 @@
 import serial
 import serial.tools.list_ports
+import lighTag_Algorithm as la
  
 def getSerial():
     
@@ -29,6 +30,7 @@ def getSerial():
         com_input = ser.read(32)
         if com_input:   
             print(com_input.hex())
+            print(la.getDis(com_input.hex()))
     
     ser.close()
     

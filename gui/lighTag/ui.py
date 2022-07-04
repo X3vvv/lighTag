@@ -233,7 +233,7 @@ class MainLayout(Widget):
             Color(0.9, 0.1, 0.1, 0.9)
             Line(
                 width=2,
-                circle=(x, y + 250, 0.2),
+                circle=(x, y + 250, 1),
             )
 
     # def update_label_dist(self, arr):

@@ -4,6 +4,8 @@ import sympy
 import numpy as np
 from numpy import *
 
+import serial
+import serial.tools.list_ports
 
 # Four Base Station Coordinates
 XA = 0.0
@@ -43,9 +45,37 @@ def main():
     )  ### !!! May encounter error if the port is already used, pending to fix !!!
     c.listen(10)
     client, address = c.accept()
+    
+    
+    # ports_list = list(serial.tools.list_ports.comports())
+    # if len(ports_list) <= 0:
+    #     print("无串口设备。")
+    # else:
+    #     print("可用的串口设备如下：")
+    #     for comport in ports_list:
+    #         print(list(comport)[0], list(comport)[1])
+    
+    ser = serial.Serial("/dev/cu.usbserial-210", 115200)    # 打开COM17，将波特率配置为115200，其余参数使用默认值
+    if ser.isOpen():                        # 判断串口是否成功打开
+        print("打开串口成功。")
+        print(ser.name)    # 输出串口号
+    else:
+        print("打开串口失败。")
+    
+    ser = serial.Serial(port="/dev/cu.usbserial-210",
+                        baudrate=115200,
+                        bytesize=serial.SEVENBITS,
+                        parity=serial.PARITY_NONE,
+                        stopbits=serial.STOPBITS_TWO,
+                        timeout=0.5) 
+
+    
+    #ser.close()
 
     while True:
-        bytes = client.recv(1024)  # Receive bytes from WIFI
+        com_input = ser.read(1024)  
+        bytes = com_input
+        #bytes = client.recv(1024)  # Receive bytes from WIFI
         print(bytes.hex())
         inDisArr = getDis(
             bytes.hex()

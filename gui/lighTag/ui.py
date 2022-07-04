@@ -2,6 +2,7 @@ from typing import Tuple
 import lighTag_Algorithm as lt
 import socket
 
+
 from kivy import Config
 
 # set default window size and minumum size

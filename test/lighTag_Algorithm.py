@@ -36,7 +36,7 @@ def main():
     """ main function
         Steps:
         1. Receive data from WIFI by TCP/IP
-        2. Call convert() function to convert received data to distance data
+        2. Call getDis() function to convert received data to distance data
         3. Call triPosition()/quartPosition() function to calculate the 2D/3D location of the tag
     """
     c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -47,7 +47,7 @@ def main():
     client, address = c.accept()
     while True:
         bytes = client.recv(1024) # Receive bytes from WIFI
-        inDisArr = convert(bytes.hex()) # Convert bytes to hex string and get the distance data
+        inDisArr = getDis(bytes.hex()) # Convert bytes to hex string and get the distance data
         if (inDisArr != -1):
             print(inDisArr)
             print(triPosition(XA,YA,inDisArr[0],XB,YB,inDisArr[1],XC,YC,inDisArr[2])) # Calculate the 2D location of the tag
@@ -57,7 +57,7 @@ def main():
         print("/n")
 
 
-def convert(inStr):
+def getDis(inStr):
     """ Convert hex string to distance data
 
     Args:

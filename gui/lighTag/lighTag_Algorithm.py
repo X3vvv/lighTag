@@ -254,8 +254,8 @@ def test():
     triPosition(XA, YA, DA, XB, YB, DB, XC, YC, DC)
     quartPosition(XA, YA, ZA, DA, XB, YB, ZB, DB, XC, YC, ZC, DC, XD, YD, ZD, DD)
 
-
-main()
+if __name__ == '__main__':
+    main()
 # test()
 
 # print(timeit.timeit("test()", setup="from __main__ import test", number=100))

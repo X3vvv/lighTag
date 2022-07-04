@@ -1,3 +1,6 @@
+from hashlib import new
+from typing import Tuple
+
 from kivy import Config
 
 # set default window size and minumum size
@@ -17,6 +20,38 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 
 ONE_CENTIMETER = 1  # 1 in kivy size unit
+
+
+class Base:
+    SIDE_LEN = 17
+    FONT_SIZE = 13
+    CANVAS_ORIGIN_OFFSET = (0, 250)  # canvas origin's position relative to the window
+
+    def __init__(self, id):
+        self.id = id
+
+        # init base position: default at (0, 0) (which is actually (0, 0) + CANVAS_ORIGIN_OFFSET on window)
+        self.x = 0
+        self.y = 0
+        self.z = 0
+
+        self.pos_on_screen = self.move_pos((self.x, self.y), self.CANVAS_ORIGIN_OFFSET)
+
+        self.widget = Button(
+            text=str(self.id),
+            font_size=self.FONT_SIZE,
+            size_hint=(None, None),
+            size=(self.SIDE_LEN, self.SIDE_LEN),
+            pos=self.pos_on_screen,
+            on_release=self._on_add_base_released,
+        )
+
+    def move_pos(self, ori_pos: Tuple(float, float), move_dist: Tuple(float, float)):
+        return (ori_pos[0] + move_dist[0], ori_pos[1] + move_dist[1])
+
+    def update_pos(self, new_pos):
+        self.pos_on_screen = new_pos
+        self.widget.pos = self.pos_on_screen
 
 
 class MainLayout(Widget):
@@ -40,16 +75,18 @@ class MainLayout(Widget):
             font_size=13,
             size_hint=(None, None),
             size=(17, 17),
-            pos_hint={"x": 0.5, "y": 0.5},
-            on_release=self._on_base_released,
+            # pos_hint={"x": 0.5, "y": 0.5},
+            pos=(0, 250),  # pos of left-bottom corner of the button
+            on_release=self._on_add_base_released,
         )
         canvas = self.ids.canvas
         canvas.add_widget(new_base)
         self.num_of_base += 1
 
-    def _on_base_released(self, base_btn):
+    def _on_add_base_released(self, base_btn):
+        # self.focused_base =
         self.ids.canvas.add_widget(self._create_base_popup(base_btn))
-        print(base_btn)
+        # print(base_btn)
 
     def _create_base_popup(self, base_btn):
         def popup_confirm(confirm_btn):
@@ -58,15 +95,51 @@ class MainLayout(Widget):
             y = float(base_y.text)
             z = float(base_z.text)
             print(x, y, z)
+            x = 0 if x <= 0 else x
+            y = (
+                self.ids.control_panel.height
+                if y < self.ids.control_panel.height
+                else y
+            )
             base_btn.pos = [x, y]
             self.ids.canvas.remove_widget(popup)
+
+        def delete_base(delete_btn):
+            # def confirm_delete_base(confirm_delete_btn):
+            #     self.ids.canvas.remove_widget(doubleCheckPopup)
+
+            # def cancel_delete_base(cancel_delete_btn):
+            #     self.ids.canvas.remove_widget(doubleCheckPopup)
+
+            # doubleCheckLayout = BoxLayout(orientation="vertical")
+            # doubleCheckLayout.add_widget(
+            #     Label(text="Are you sure to delete this base?", font_size=20)
+            # )
+            # doubleCheckLayout.add_widget(
+            #     Button(text="Yes", size_hint=(1, 0.4), on_release=confirm_delete_base)
+            # )
+            # doubleCheckLayout.add_widget(
+            #     Button(text="Cancel", size_hint=(1, 0.4), on_release=cancel_delete_base)
+            # )
+            # doubleCheckPopup = Popup(
+            #     title="Settings",
+            #     content=doubleCheckLayout,
+            #     size_hint=(None, None),
+            #     size=(200, 150),
+            #     pos_hint={
+            #         "center_x": 0.5,
+            #         "center_y": 0.500,
+            #     },
+            # )
+            # self.ids.canvas.add_widget(doubleCheckPopup)
+            pass
 
         mainLayout = BoxLayout(orientation="vertical")
 
         posLayout = GridLayout(cols=2)
-        base_x = TextInput(multiline=False, text="0")
-        base_y = TextInput(multiline=False, text="0")
-        base_z = TextInput(multiline=False, text="0")
+        base_x = TextInput(multiline=False, text="0", font_size=10)
+        base_y = TextInput(multiline=False, text="0", font_size=10)
+        base_z = TextInput(multiline=False, text="0", font_size=10)
         posLayout.add_widget(Label(text="x:"))
         posLayout.add_widget(base_x)
         posLayout.add_widget(Label(text="y:"))
@@ -75,7 +148,17 @@ class MainLayout(Widget):
         posLayout.add_widget(base_z)
 
         mainLayout.add_widget(posLayout)
-        mainLayout.add_widget(Button(text="Confirm", on_release=popup_confirm))
+        mainLayout.add_widget(
+            Button(text="Confirm", size_hint=(1, 0.45), on_release=popup_confirm)
+        )
+        mainLayout.add_widget(
+            Button(
+                text="Delete",
+                size_hint=(1, 0.45),
+                color=(1, 30 / 255, 30 / 255, 1),
+                on_release=delete_base,
+            )
+        )
 
         popup = Popup(
             title="Settings",

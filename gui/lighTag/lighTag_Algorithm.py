@@ -62,11 +62,11 @@ def main():
     else:
         print("打开串口失败。")
     
-    ser = serial.Serial(port="/dev/cu.usbserial-210",
+    ser = serial.Serial(port="/dev/cu.usbserial-110",
                         baudrate=115200,
-                        bytesize=serial.SEVENBITS,
+                        bytesize=serial.EIGHTBITS,
                         parity=serial.PARITY_NONE,
-                        stopbits=serial.STOPBITS_TWO,
+                        stopbits=serial.STOPBITS_ONE,
                         timeout=0.5) 
 
     

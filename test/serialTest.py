@@ -20,14 +20,12 @@ def getSerial():
         ser.open()
         print("打开串口失败。")
 
-    ser = serial.Serial(
-        port="COM3",
-        baudrate=115200,
-        bytesize=serial.SEVENBITS,
-        parity=serial.PARITY_NONE,
-        stopbits=serial.STOPBITS_TWO,
-        timeout=0.5,
-    )
+    ser = serial.Serial(port="/dev/cu.usbserial-110",
+                        baudrate=115200,
+                        bytesize=serial.EIGHTBITS,
+                        parity=serial.PARITY_NONE,
+                        stopbits=serial.STOPBITS_ONE,
+                        timeout=0.5) 
 
     while True:
         com_input = ser.read(32)

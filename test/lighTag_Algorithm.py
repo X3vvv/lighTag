@@ -14,15 +14,15 @@ YA = 0.0
 ZA = 2.0
 
 XB = 0.0
-YB = 4.3
+YB = 3.7
 ZB = 2.0
 
-XC = 5.7
-YC = 4.3
+XC = 5.55
+YC = 3.7
 ZC = 2.0
 
-XD = 5.7
-YD = -4.4
+XD = 5.55
+YD = -4.6
 ZD = 1.5
 """
 Note that if all four z-coordinates are the same, 

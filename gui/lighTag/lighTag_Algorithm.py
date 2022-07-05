@@ -55,14 +55,14 @@ def main():
     #     for comport in ports_list:
     #         print(list(comport)[0], list(comport)[1])
     
-    ser = serial.Serial("/dev/cu.usbserial-210", 115200)    # 打开COM17，将波特率配置为115200，其余参数使用默认值
+    ser = serial.Serial("/dev/cu.usbserial-1430", 115200)    # 打开COM17，将波特率配置为115200，其余参数使用默认值
     if ser.isOpen():                        # 判断串口是否成功打开
         print("打开串口成功。")
         print(ser.name)    # 输出串口号
     else:
         print("打开串口失败。")
     
-    ser = serial.Serial(port="/dev/cu.usbserial-110",
+    ser = serial.Serial(port="/dev/cu.usbserial-1430",
                         baudrate=115200,
                         bytesize=serial.EIGHTBITS,
                         parity=serial.PARITY_NONE,
@@ -81,7 +81,7 @@ def main():
             bytes.hex()
         )  # Convert bytes to hex string and get the distance data
 
-        if 1:
+        if inDisArr != -1:
             print(inDisArr)
             tri = triPosition(
                 XA, YA, inDisArr[0], XB, YB, inDisArr[1], XC, YC, inDisArr[2]
@@ -108,8 +108,8 @@ def main():
                 )
             )  # Calculate the 3D location of the tag
         else:
-            print("Distance Error!")
-        print("\n")
+            continue
+        #print("\n")
 
 
 def getDis(inStr):
@@ -128,6 +128,7 @@ def getDis(inStr):
         (inStr[28:30] == "0a") and (inStr[30:32] == "0d")
     ):
         arr = []
+        flag = 0
         for i in range(0, len(inStr), 2):
             str_1 = inStr[i : i + 2]
 
@@ -154,12 +155,15 @@ def getDis(inStr):
                 s = inStr[i : i + 2]  # Get the 2 bytes
                 inInt = int(s, 16)  # hex to dec
                 out = inInt / 100  # Get real distance
+
                 if i == 14 or i == 18 or i == 22 or i == 26:  # Low 8 bits (2 bytes)
                     val = inInt << 8  # Shift 8 bits to left
                     val = val / 100  # Get real distance
                     out = (
                         val + arr[int(i / 2 - 1)]
                     )  # Add the high 8 bits distance to the low 8 bits distance to get the real distance
+                    if out == 0:
+                        return -1
                 arr.append(out)
         return arr[
             7::2

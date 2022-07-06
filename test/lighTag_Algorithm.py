@@ -14,15 +14,15 @@ YA = 0.0
 ZA = 2.0
 
 XB = 0.0
-YB = 3.7
+YB = 8.6
 ZB = 2.0
 
-XC = 5.55
-YC = 3.7
+XC = 5.6
+YC = 8.6
 ZC = 2.0
 
-XD = 5.55
-YD = -4.6
+XD = 5.6
+YD = 0.0
 ZD = 1.5
 """
 Note that if all four z-coordinates are the same, 
@@ -275,20 +275,22 @@ def quartPosition(xa, ya, za, da, xb, yb, zb, db, xc, yc, zc, dc, xd, yd, zd, dd
 
     # Solve the equations
     (out,) = sympy.linsolve([f1, f2, f3], [x, y, z])  # tuple
-    return list(out)
+    rst = list(out,)
+    rst[2] = rst[2] - 4.15
+    return rst
 
 
 def test():
-    DA = 5.83
-    DB = 5.39
-    DC = 4.36
-    DD = 3.0
+    DA = 5.87
+    DB = 6.01
+    DC = 4.54
+    DD = 4.72
 
-    triPosition(XA, YA, DA, XB, YB, DB, XC, YC, DC)
-    quartPosition(XA, YA, ZA, DA, XB, YB, ZB, DB, XC, YC, ZC, DC, XD, YD, ZD, DD)
+    print(triPosition(XA, YA, DA, XB, YB, DB, XC, YC, DC))
+    print(quartPosition(XA, YA, ZA, DA, XB, YB, ZB, DB, XC, YC, ZC, DC, XD, YD, ZD, DD))
 
 
-main()
-# test()
+#main()
+test()
 
 # print(timeit.timeit("test()", setup="from __main__ import test", number=100))

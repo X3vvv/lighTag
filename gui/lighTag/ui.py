@@ -24,26 +24,26 @@ from kivy.clock import Clock
 from kivy.graphics import Line, Color
 
 
-# For WIFI
+# ######## For WIFI ########
 print("Starts to connect socket.")
 
 c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 c.bind(
     ("192.168.0.119", 8234)
-)  ### !!! May encounter error if the port is already used, pending to fix !!!
+)
 c.listen(10)
 client, address = c.accept()
 
 print("Socket connected.")
-######
+# ######## For WIFI ########
 
-# For serial port
-# ser = serial.Serial("/dev/cu.usbserial-110", 115200)    # 打开COM17，将波特率配置为115200，其余参数使用默认值
-# if ser.isOpen():                        # 判断串口是否成功打开
-#     print("打开串口成功。")
-#     print(ser.name)    # 输出串口号
+# ######## For serial port ########
+# ser = serial.Serial("/dev/cu.usbserial-110", 115200)
+# if ser.isOpen():                        
+#     print("Serial port connected.")
+#     print(ser.name)
 # else:
-#     print("打开串口失败。")
+#     print("Serial port failed to connect.")
 
 # ser = serial.Serial(port="/dev/cu.usbserial-110",
 #                     baudrate=115200,
@@ -51,15 +51,17 @@ print("Socket connected.")
 #                     parity=serial.PARITY_NONE,
 #                     stopbits=serial.STOPBITS_ONE,
 #                     timeout=0.5) 
-
-######
-
-
+# ######## For serial port ########
 
 def iot_callback(duration_after_last_call):
     global inDisArr, tri
-    # bytes = ser.read(16) # For serial port
-    bytes = client.recv(1024)  # Receive bytes from WIFI
+    
+    # Receive bytes from serial port
+    # bytes = ser.read(16) 
+    
+    # Receive bytes from WIFI
+    bytes = client.recv(1024)  
+    
     print("Received bytes:", bytes.hex())
     inDisArr = lt.getDis(
         bytes.hex()

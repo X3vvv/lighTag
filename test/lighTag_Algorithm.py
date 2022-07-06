@@ -38,16 +38,43 @@ def main():
     2. Call getDis() function to convert received data to distance data
     3. Call triPosition()/quartPosition() function to calculate the 2D/3D location of the tag
     """
+    
+    # ######## For WIFI ########
+    print("Starts to connect socket.")
+
     c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # c.connect(('192.168.0.119', 8234))
-    # c.close()
     c.bind(
         ("192.168.0.119", 8234)
-    )  ### !!! May encounter error if the port is already used, pending to fix !!!
+    )
     c.listen(10)
     client, address = c.accept()
+
+    print("Socket connected.")
+    # ######## For WIFI ########
+
+    # ######## For serial port ########
+    # ser = serial.Serial("/dev/cu.usbserial-110", 115200)
+    # if ser.isOpen():                        
+    #     print("Serial port connected.")
+    #     print(ser.name)
+    # else:
+    #     print("Serial port failed to connect.")
+
+    # ser = serial.Serial(port="/dev/cu.usbserial-110",
+    #                     baudrate=115200,
+    #                     bytesize=serial.EIGHTBITS,
+    #                     parity=serial.PARITY_NONE,
+    #                     stopbits=serial.STOPBITS_ONE,
+    #                     timeout=0.5) 
+    # ######## For serial port ########
+    
     while True:
-        bytes = client.recv(1024)  # Receive bytes from WIFI
+        # Receive bytes from serial port
+        # bytes = ser.read(16) 
+        
+        # Receive bytes from WIFI
+        bytes = client.recv(1024) 
+         
         print(bytes.hex())
         inDisArr = getDis(
             bytes.hex()
@@ -93,24 +120,25 @@ def getDis(inStr):
 
     Returns:
         arr (float[]): An array of length 4 containing distance data: [TA, TB, TC, TD]
-        or -1 if error
+        or -1 if error: wrong format or received 0000
     """
     # Check if the string is valid, start with "6d72" and end with "0a0d"
     if ((inStr[0:2] == "6d") and (inStr[2:4] == "72")) and (
         (inStr[28:30] == "0a") and (inStr[30:32] == "0d")
     ):
         arr = []
+        flag = 0
         for i in range(0, len(inStr), 2):
             str_1 = inStr[i : i + 2]
 
-            # m r
-            if i == 0 or i == 2:
-                binary_str = codecs.decode(str_1, "hex")  # hex to ASCII code
-                arr.append(str(binary_str, "utf-8"))
+            # # m r
+            # if i == 0 or i == 2:
+            #     binary_str = codecs.decode(str_1, "hex")  # hex to ASCII code
+            #     arr.append(str(binary_str, "utf-8"))
 
-            # S/N, TAG ID, Frame
-            if i == 4 or i == 6 or i == 8 or i == 10:
-                arr.append(inStr[i : i + 2])
+            # # S/N, TAG ID, Frame
+            # if i == 4 or i == 6 or i == 8 or i == 10:
+            #     arr.append(inStr[i : i + 2])
 
             # dis 1.hex -> dec 2. dec/100
             if (
@@ -126,12 +154,15 @@ def getDis(inStr):
                 s = inStr[i : i + 2]  # Get the 2 bytes
                 inInt = int(s, 16)  # hex to dec
                 out = inInt / 100  # Get real distance
+
                 if i == 14 or i == 18 or i == 22 or i == 26:  # Low 8 bits (2 bytes)
                     val = inInt << 8  # Shift 8 bits to left
                     val = val / 100  # Get real distance
                     out = (
                         val + arr[int(i / 2 - 1)]
                     )  # Add the high 8 bits distance to the low 8 bits distance to get the real distance
+                    if out == 0:
+                        return -1
                 arr.append(out)
         return arr[
             7::2

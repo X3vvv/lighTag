@@ -13,15 +13,15 @@ YA = 0.0
 ZA = 2.0
 
 XB = 0.0
-YB = 4.3
+YB = 8.6
 ZB = 2.0
 
-XC = 5.7
-YC = 4.3
+XC = 5.6
+YC = 8.6
 ZC = 2.0
 
-XD = 5.7
-YD = -4.4
+XD = 5.6
+YD = 0.0
 ZD = 1.5
 """
 Note that if all four z-coordinates are the same, 
@@ -131,14 +131,14 @@ def getDis(inStr):
         for i in range(0, len(inStr), 2):
             str_1 = inStr[i : i + 2]
 
-            # # m r
-            # if i == 0 or i == 2:
-            #     binary_str = codecs.decode(str_1, "hex")  # hex to ASCII code
-            #     arr.append(str(binary_str, "utf-8"))
+            # m r
+            if i == 0 or i == 2:
+                binary_str = codecs.decode(str_1, "hex")  # hex to ASCII code
+                arr.append(str(binary_str, "utf-8"))
 
-            # # S/N, TAG ID, Frame
-            # if i == 4 or i == 6 or i == 8 or i == 10:
-            #     arr.append(inStr[i : i + 2])
+            # S/N, TAG ID, Frame
+            if i == 4 or i == 6 or i == 8 or i == 10:
+                arr.append(inStr[i : i + 2])
 
             # dis 1.hex -> dec 2. dec/100
             if (

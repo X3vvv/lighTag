@@ -1,5 +1,8 @@
-from hashlib import new
 from typing import Tuple
+import lighTag_Algorithm as lt
+import serial
+import serial.tools.list_ports
+import socket
 
 from kivy import Config
 
@@ -10,7 +13,6 @@ Config.set("graphics", "minimum_width", "450")
 Config.set("graphics", "minimum_height", "750")
 
 from kivy.app import App
-from kivy.core.window import Window
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
@@ -18,8 +20,74 @@ from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
+from kivy.clock import Clock
+from kivy.graphics import Line, Color
 
-ONE_CENTIMETER = 1  # 1 in kivy size unit
+
+# ######## For WIFI ########
+print("Starts to connect socket.")
+
+c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+c.bind(("192.168.0.119", 8234))
+c.listen(10)
+client, address = c.accept()
+
+print("Socket connected.")
+# ######## For WIFI ########
+
+# ######## For serial port ########
+# ser = serial.Serial("/dev/cu.usbserial-110", 115200)
+# if ser.isOpen():
+#     print("Serial port connected.")
+#     print(ser.name)
+# else:
+#     print("Serial port failed to connect.")
+
+# ser = serial.Serial(port="/dev/cu.usbserial-110",
+#                     baudrate=115200,
+#                     bytesize=serial.EIGHTBITS,
+#                     parity=serial.PARITY_NONE,
+#                     stopbits=serial.STOPBITS_ONE,
+#                     timeout=0.5)
+# ######## For serial port ########
+
+
+def iot_callback(duration_after_last_call):
+    global inDisArr, tri
+
+    # Receive bytes from serial port
+    # bytes = ser.read(16)
+
+    # Receive bytes from WIFI
+    bytes = client.recv(1024)
+
+    print("Received bytes:", bytes.hex())
+    inDisArr = lt.getDis(
+        bytes.hex()
+    )  # Convert bytes to hex string and get the distance data
+
+
+#     print("After getDis", inDisArr)
+
+#     if inDisArr != -1:
+#         # print(inDisArr)
+#         tri = lt.triPosition(
+#             lt.XA,
+#             lt.YA,
+#             inDisArr[0],
+#             lt.XB,
+#             lt.YB,
+#             inDisArr[1],
+#             lt.XC,
+#             lt.YC,
+#             inDisArr[2],
+#         )
+#     else:
+#         print("Distance Error!")
+
+
+# Clock.schedule_interval(iot_callback, 0.5)
+# print("Kivy clock callback added.")
 
 
 class Base:
@@ -46,7 +114,7 @@ class Base:
             on_release=self._on_add_base_released,
         )
 
-    def move_pos(self, ori_pos: Tuple(float, float), move_dist: Tuple(float, float)):
+    def move_pos(self, ori_pos: Tuple[float, float], move_dist: Tuple[float, float]):
         return (ori_pos[0] + move_dist[0], ori_pos[1] + move_dist[1])
 
     def update_pos(self, new_pos):
@@ -57,6 +125,8 @@ class Base:
 class MainLayout(Widget):
     num_of_base = 0
     focused_base = None
+    bases = []
+    CENTIMETER_PER_PIXEL = 1  # how many centimeters a kivy pixel represents
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -69,6 +139,7 @@ class MainLayout(Widget):
         self.ids.settings_img.source = "imgs/settings-outline.png"
 
     def add_base(self):
+        """Callback function for adding a base button to the canvas."""
         base_id = self.num_of_base + 1
         new_base = Button(
             text=str(base_id),
@@ -77,31 +148,35 @@ class MainLayout(Widget):
             size=(17, 17),
             # pos_hint={"x": 0.5, "y": 0.5},
             pos=(0, 250),  # pos of left-bottom corner of the button
-            on_release=self._on_add_base_released,
+            on_release=self._on_base_released,
         )
+        self.bases.append(new_base)
         canvas = self.ids.canvas
         canvas.add_widget(new_base)
         self.num_of_base += 1
 
-    def _on_add_base_released(self, base_btn):
-        # self.focused_base =
-        self.ids.canvas.add_widget(self._create_base_popup(base_btn))
-        # print(base_btn)
+    def _on_base_released(self, base_btn):
+        """Callback function for when the base button is released. A popup window will be created."""
 
-    def _create_base_popup(self, base_btn):
         def popup_confirm(confirm_btn):
             # print(confirm_btn)
-            x = float(base_x.text)
-            y = float(base_y.text)
-            z = float(base_z.text)
+            x = y = z = 0
+            if base_x.text.isdigit():
+                x = float(base_x.text)
+            if base_y.text.isdigit():
+                y = float(base_y.text)
+            if base_z.text.isdigit():
+                z = float(base_z.text)
             print(x, y, z)
-            x = 0 if x <= 0 else x
-            y = (
-                self.ids.control_panel.height
-                if y < self.ids.control_panel.height
-                else y
-            )
-            base_btn.pos = [x, y]
+            if x < 0:
+                x = 0
+            elif x > self.ids.canvas_temp_label.size[0] - 17:
+                x = self.ids.canvas_temp_label.size[0] - 17
+            if y < 0:
+                y = 0
+            elif y > self.ids.canvas_temp_label.size[1] - 17:
+                y = self.ids.canvas_temp_label.size[1] - 17
+            base_btn.pos = [x, y + 250]
             self.ids.canvas.remove_widget(popup)
 
         def delete_base(delete_btn):
@@ -157,6 +232,7 @@ class MainLayout(Widget):
                 size_hint=(1, 0.45),
                 color=(1, 30 / 255, 30 / 255, 1),
                 on_release=delete_base,
+                disabled=True,
             )
         )
 
@@ -168,13 +244,50 @@ class MainLayout(Widget):
             pos_hint={"center_x": 0.5, "center_y": 0.5},
         )
 
-        return popup
+        self.ids.canvas.add_widget(popup)
+
+    tmp_pos = [120, 240]
+
+    def debug(self):
+        global inDisArr, tri
+        for i in range(len(self.bases)):
+            print("base[{}]: {}]".format(i, self.bases[i].pos))
+        if len(self.bases) <= 0:
+            print("No base yet.")
+
+        # print(inDisArr, tri)
+        # print("Draw a circle at: ({}, {})...", tri[0], tri[1] + 250)
+        # self.draw_a_circle(tri[0], tri[1])
+        # print("Finish drawing!")
+        print("Draw a circle at: ({}, {})...", self.tmp_pos[0], self.tmp_pos[1] + 250)
+        self.draw_a_circle(*self.tmp_pos)
+        print("Finish drawing!")
+        from random import randint
+
+        self.tmp_pos[0] += randint(-5, 5)
+        self.tmp_pos[1] += randint(-5, 5)
+        # print("Starting schedule callbacks, interval: 1s")
+        # Clock.schedule_interval(self.draw_a_circle(*tri), 1)
+
+    def draw_a_circle(self, x, y):
+        with self.ids.canvas.canvas:
+            Color(0.9, 0.1, 0.1, 0.9)
+            Line(
+                width=2,
+                circle=(x, y + 250, 1),
+            )
+
+    # def update_label_dist(self, arr):
+    #     print("UI:", arr)
+
+    # def update_label_pos(self, arr):
+    #     print("UI:", arr)
 
 
-class MainApp(App):
+class UIApp(App):
     def build(self):
         return MainLayout()
 
 
 if __name__ == "__main__":
-    MainApp().run()
+    UIApp().run()

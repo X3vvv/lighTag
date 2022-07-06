@@ -83,7 +83,7 @@
 
             Label:
                 id: canvas_size_label
-                text: '{}cm x {}cm '.format(*canvas_temp_label.size)
+                text: '{}cm x {}cm '.format(canvas_temp_label.size[0] / root.CENTIMETER_PER_PIXEL, canvas_temp_label.size[1] / root.CENTIMETER_PER_PIXEL)
                 font_size: 12
                 size_hint: (None, None)
                 size: self.texture_size
@@ -115,7 +115,7 @@
                     on_release: root.add_base()
 
                 Label:
-                    id: "tag distance"
+                    id: tag_distance
                     text: "Tag distance (m)\n" "base1:  3.78\n" "base2:  0.43\n" "base3:  7.01\n" "base4:  5.26\n"
                     font_size: 12
 
@@ -127,3 +127,4 @@
                     text: "not used"
                     # size: root.width, root.height
                     background_color: (0.2, 0.2, 0.2, 1)
+                    on_release: root.debug()

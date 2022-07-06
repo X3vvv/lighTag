@@ -34,54 +34,55 @@ from kivy.graphics import Line, Color
 
 # print("Socket connected.")
 
-ser = serial.Serial("/dev/cu.usbserial-110", 115200)  # 打开COM17，将波特率配置为115200，其余参数使用默认值
-if ser.isOpen():  # 判断串口是否成功打开
-    print("打开串口成功。")
-    print(ser.name)  # 输出串口号
-else:
-    print("打开串口失败。")
 
-ser = serial.Serial(
-    port="/dev/cu.usbserial-110",
-    baudrate=115200,
-    bytesize=serial.SEVENBITS,
-    parity=serial.PARITY_NONE,
-    stopbits=serial.STOPBITS_TWO,
-    timeout=0.5,
-)
+# ser = serial.Serial("/dev/cu.usbserial-110", 115200)  # 打开COM17，将波特率配置为115200，其余参数使用默认值
+# if ser.isOpen():  # 判断串口是否成功打开
+#     print("打开串口成功。")
+#     print(ser.name)  # 输出串口号
+# else:
+#     print("打开串口失败。")
 
-
-def iot_callback(duration_after_last_call):
-    global inDisArr, tri
-    com_input = ser.read(16)
-    bytes = com_input
-    # bytes = client.recv(1024)  # Receive bytes from WIFI
-    print("Received bytes:", bytes.hex())
-    inDisArr = lt.getDis(
-        bytes.hex()[0:32]
-    )  # Convert bytes to hex string and get the distance data
-
-    print("After getDis", inDisArr)
-
-    if inDisArr != -1:
-        # print(inDisArr)
-        tri = lt.triPosition(
-            lt.XA,
-            lt.YA,
-            inDisArr[0],
-            lt.XB,
-            lt.YB,
-            inDisArr[1],
-            lt.XC,
-            lt.YC,
-            inDisArr[2],
-        )
-    else:
-        print("Distance Error!")
+# ser = serial.Serial(
+#     port="/dev/cu.usbserial-110",
+#     baudrate=115200,
+#     bytesize=serial.SEVENBITS,
+#     parity=serial.PARITY_NONE,
+#     stopbits=serial.STOPBITS_TWO,
+#     timeout=0.5,
+# )
 
 
-Clock.schedule_interval(iot_callback, 0.5)
-print("Kivy clock callback added.")
+# def iot_callback(duration_after_last_call):
+#     global inDisArr, tri
+#     com_input = ser.read(16)
+#     bytes = com_input
+#     # bytes = client.recv(1024)  # Receive bytes from WIFI
+#     print("Received bytes:", bytes.hex())
+#     inDisArr = lt.getDis(
+#         bytes.hex()[0:32]
+#     )  # Convert bytes to hex string and get the distance data
+
+#     print("After getDis", inDisArr)
+
+#     if inDisArr != -1:
+#         # print(inDisArr)
+#         tri = lt.triPosition(
+#             lt.XA,
+#             lt.YA,
+#             inDisArr[0],
+#             lt.XB,
+#             lt.YB,
+#             inDisArr[1],
+#             lt.XC,
+#             lt.YC,
+#             inDisArr[2],
+#         )
+#     else:
+#         print("Distance Error!")
+
+
+# Clock.schedule_interval(iot_callback, 0.5)
+# print("Kivy clock callback added.")
 
 
 class Base:
@@ -154,9 +155,13 @@ class MainLayout(Widget):
 
         def popup_confirm(confirm_btn):
             # print(confirm_btn)
-            x = float(base_x.text)
-            y = float(base_y.text)
-            z = float(base_z.text)
+            x = y = z = 0
+            if base_x.text.isdigit():
+                x = float(base_x.text)
+            if base_y.text.isdigit():
+                y = float(base_y.text)
+            if base_z.text.isdigit():
+                z = float(base_z.text)
             print(x, y, z)
             if x < 0:
                 x = 0
@@ -236,6 +241,8 @@ class MainLayout(Widget):
 
         self.ids.canvas.add_widget(popup)
 
+    tmp_pos = [120, 240]
+
     def debug(self):
         global inDisArr, tri
         for i in range(len(self.bases)):
@@ -244,9 +251,16 @@ class MainLayout(Widget):
             print("No base yet.")
 
         # print(inDisArr, tri)
-        print("Draw a circle at: ({}, {})...", tri[0], tri[1] + 250)
-        self.draw_a_circle(tri[0], tri[1])
+        # print("Draw a circle at: ({}, {})...", tri[0], tri[1] + 250)
+        # self.draw_a_circle(tri[0], tri[1])
+        # print("Finish drawing!")
+        print("Draw a circle at: ({}, {})...", self.tmp_pos[0], self.tmp_pos[1] + 250)
+        self.draw_a_circle(*self.tmp_pos)
         print("Finish drawing!")
+        from random import randint
+
+        self.tmp_pos[0] += randint(-5, 5)
+        self.tmp_pos[1] += randint(-5, 5)
         # print("Starting schedule callbacks, interval: 1s")
         # Clock.schedule_interval(self.draw_a_circle(*tri), 1)
 

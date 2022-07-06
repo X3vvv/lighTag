@@ -22,7 +22,7 @@ ZC = 2.0
 
 XD = 5.6
 YD = 0.0
-ZD = 1.5
+ZD = 2.37
 """
 Note that if all four z-coordinates are the same, 
 then the x, y and z of the fourth point can be directly implied, 

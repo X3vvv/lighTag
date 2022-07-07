@@ -31,7 +31,7 @@ class lighTagAlgo:
     disArr = [0.0, 0.0, 0.0, 0.0]
     
     # (x,y,z) for the target
-    coorArr = [0.0, 0.0, 0.0, 0.0]
+    coorArr = [0.0, 0.0, 0.0]
     
     # For WIFI
     c = None
@@ -49,8 +49,7 @@ class lighTagAlgo:
         For WIFI connection
         """
         print("Starts to connect socket.")
-        self.c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+        
         self.c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.c.bind(("192.168.0.119", 8234))
         self.c.listen(10)
@@ -224,7 +223,7 @@ class lighTagAlgo:
         # Solve the equations
         result = sympy.solve([f1, f2], [x, y])
         locx, locy = result[x], result[y]
-        self.coorArr = [locx, locy]
+        self.coorArr = [locx, locy, None]
         return [locx, locy]
     
     def calculateQuartPosition(self):
@@ -297,7 +296,7 @@ class lighTagAlgo:
 
         # Solve the equations
         (out,) = sympy.linsolve([f1, f2, f3], [x, y, z])  # tuple
-        self.disArr = list(out)
+        self.coorArr = list(out)
         return list(out)
     
     
@@ -305,7 +304,7 @@ class lighTagAlgo:
         """return the coordinates of the tag
 
         Returns:
-            list: [x, y]
+            list: [x, y, z]
         """
         return self.coorArr
     

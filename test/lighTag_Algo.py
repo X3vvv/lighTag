@@ -309,13 +309,93 @@ class lighTagAlgo:
         """
         return self.coorArr
     
+    def setBaseACoor(self,x,y,z):
+        """set the coordinates of the base station A
+
+        Args:
+            x (float): x coordinate of the base station A
+            y (float): y coordinate of the base station A
+            z (float): z coordinate of the base station A
+
+        Returns:
+            Boolean: True for success
+        """
+        self.XA = x
+        self.YA = y
+        self.ZA = z
+        return True
+    
+    def setBaseBCoor(self,x,y,z):
+        """set the coordinates of the base station B
+
+        Args:
+            x (float): x coordinate of the base station B
+            y (float): y coordinate of the base station B
+            z (float): z coordinate of the base station B
+
+        Returns:
+            Boolean: True for success
+        """
+        self.XB = x
+        self.YB = y
+        self.ZB = z
+        return True
+    
+    def setBaseCCoor(self,x,y,z):
+        """set the coordinates of the base station C
+
+        Args:
+            x (float): x coordinate of the base station C
+            y (float): y coordinate of the base station C
+            z (float): z coordinate of the base station C
+
+        Returns:
+            Boolean: True for success
+        """
+        self.XC = x
+        self.YC = y
+        self.ZC = z
+        return True
+    
+    def setBaseDCoor(self,x,y,z):
+        """set the coordinates of the base station D
+
+        Args:
+            x (float): x coordinate of the base station D
+            y (float): y coordinate of the base station D
+            z (float): z coordinate of the base station D
+
+        Returns:
+            Boolean: True for success
+        """
+        self.XD = x
+        self.YD = y
+        self.ZD = z
+        return True
+    
+    def getFourBaseCoor(self):
+        """return the coordinates of the four base stations
+
+        Returns:
+            list: [xa, ya, za, xb, yb, zb, xc, yc, zc, xd, yd, zd]
+        """
+        return [self.XA, self.YA, self.ZA, self.XB, self.YB, self.ZB, self.XC, self.YC, self.ZC, self.XD, self.YD, self.ZD]
+    
     
 def test():
     lt = lighTagAlgo()
-    arr = [5.83,5.39,4.36,3.0]
-    lt.setDistance(arr)
+    
+    lt.setBaseACoor(0,0,2.0)
+    lt.setBaseBCoor(0,8.6,2.0)
+    lt.setBaseCCoor(5.6,8.6,2.0)
+    lt.setBaseDCoor(5.6,0.0,2.37)
+    
+    disArr = [5.83,5.39,4.36,3.0]
+    lt.setDistance(disArr)
+    
     lt.calculateTriPosition()
     lt.calculateQuartPosition()
+    
     print(lt.getCoor())
     
 test()

@@ -46,35 +46,165 @@ print("Kivy clock callback added.")
 
 
 class Base:
-    SIDE_LEN = 17
-    FONT_SIZE = 13
+    SIDE_LEN = 17  # side length of the squred base button
+    FONT_SIZE = 13  # font size of the text on the button
     CANVAS_ORIGIN_OFFSET = (0, 250)  # canvas origin's position relative to the window
 
-    def __init__(self, id):
+    # no class variable is defined
+
+    def __init__(self, id, father_widget):
+        """
+        Instance variables (values differs in different instances):
+            self.id: base id
+            self.widget: kivy button widget
+            self.father_widget: kivy father widget of the base button
+            self.x = y = z: position of the base button on the canvas
+        """
         self.id = id
 
-        # init base position: default at (0, 0) (which is actually (0, 0) + CANVAS_ORIGIN_OFFSET on window)
+        # init base position on the canvas
         self.x = 0
         self.y = 0
         self.z = 0
 
-        self.pos_on_screen = self.move_pos((self.x, self.y), self.CANVAS_ORIGIN_OFFSET)
+        # create the button
+        self.widget = self.create_button()
+        # father widget
+        self.father_widget = father_widget
 
-        self.widget = Button(
+    def update_pos(self, x, y, z=None):
+        """Update button position fields values and window position."""
+        # update fields
+        self.x = x
+        self.y = y
+        if z is not None:
+            self.z = z
+
+        # update widget on window
+        self.widget.pos = (x, y)
+
+    def get_pos_on_window(self):
+        """Return the position of the base button on the whole 2D window."""
+        return (
+            self.x + self.CANVAS_ORIGIN_OFFSET[0],
+            self.y + self.CANVAS_ORIGIN_OFFSET[1],
+        )
+
+    def create_button(self):
+        btn = Button(
             text=str(self.id),
             font_size=self.FONT_SIZE,
             size_hint=(None, None),
             size=(self.SIDE_LEN, self.SIDE_LEN),
-            pos=self.pos_on_screen,
-            on_release=self._on_add_base_released,
+            pos=self.get_pos_on_window(),
+            on_release=self._on_button_released,
         )
+        self.id += 1
+        return btn
 
-    def move_pos(self, ori_pos: Tuple[float, float], move_dist: Tuple[float, float]):
-        return (ori_pos[0] + move_dist[0], ori_pos[1] + move_dist[1])
+    def _on_button_released(self):
+        """Callback function for when the base button is released. A popup window will be created."""
 
-    def update_pos(self, new_pos):
-        self.pos_on_screen = new_pos
-        self.widget.pos = self.pos_on_screen
+        def create_popup_window(self):
+            """Create a popup window for the base button."""
+
+            def popup_confirm(confirm_btn):
+                """Callback function of confirm button in the base popup window. If the input isn't number, set to 0 by default."""
+                x = y = z = 0
+                if base_x.text.isdigit():
+                    x = float(base_x.text)
+                if base_y.text.isdigit():
+                    y = float(base_y.text)
+                if base_z.text.isdigit():
+                    z = float(base_z.text)
+                if x < 0:
+                    x = 0
+                elif x > self.ids.canvas_temp_label.size[0] - 17:
+                    x = self.ids.canvas_temp_label.size[0] - 17
+                if y < 0:
+                    y = 0
+                elif y > self.ids.canvas_temp_label.size[1] - 17:
+                    y = self.ids.canvas_temp_label.size[1] - 17
+                self.widget.pos = [x, y + self.father_widget.ids.control_panel.height]
+                self.father_widget.ids.canvas.remove_widget(popup)
+
+            def delete_base(delete_btn):
+                """Callback function of delete button in the base popup window."""
+                # def confirm_delete_base(confirm_delete_btn):
+                #     self.ids.canvas.remove_widget(doubleCheckPopup)
+
+                # def cancel_delete_base(cancel_delete_btn):
+                #     self.ids.canvas.remove_widget(doubleCheckPopup)
+
+                # doubleCheckLayout = BoxLayout(orientation="vertical")
+                # doubleCheckLayout.add_widget(
+                #     Label(text="Are you sure to delete this base?", font_size=20)
+                # )
+                # doubleCheckLayout.add_widget(
+                #     Button(text="Yes", size_hint=(1, 0.4), on_release=confirm_delete_base)
+                # )
+                # doubleCheckLayout.add_widget(
+                #     Button(text="Cancel", size_hint=(1, 0.4), on_release=cancel_delete_base)
+                # )
+                # doubleCheckPopup = Popup(
+                #     title="Settings",
+                #     content=doubleCheckLayout,
+                #     size_hint=(None, None),
+                #     size=(200, 150),
+                #     pos_hint={
+                #         "center_x": 0.5,
+                #         "center_y": 0.500,
+                #     },
+                # )
+                # self.ids.canvas.add_widget(doubleCheckPopup)
+                pass
+
+            # main layout of the popup window
+            mainLayout = BoxLayout(orientation="vertical")
+
+            # layout which holds all the position information
+            posLayout = GridLayout(cols=2)
+
+            base_x = TextInput(multiline=False, text="0", font_size=10)
+            base_y = TextInput(multiline=False, text="0", font_size=10)
+            base_z = TextInput(multiline=False, text="0", font_size=10)
+
+            posLayout.add_widget(Label(text="x:"))
+            posLayout.add_widget(base_x)
+            posLayout.add_widget(Label(text="y:"))
+            posLayout.add_widget(base_y)
+            posLayout.add_widget(Label(text="z:"))
+            posLayout.add_widget(base_z)
+
+            mainLayout.add_widget(posLayout)
+
+            # add confirm button
+            mainLayout.add_widget(
+                Button(text="Confirm", size_hint=(1, 0.45), on_release=popup_confirm)
+            )
+
+            # add delete button
+            mainLayout.add_widget(
+                Button(
+                    text="Delete",
+                    size_hint=(1, 0.45),
+                    color=(1, 30 / 255, 30 / 255, 1),
+                    on_release=delete_base,
+                    disabled=True,
+                )
+            )
+
+            # add main layout to the popup window
+            return Popup(
+                title="Settings",
+                content=mainLayout,
+                size_hint=(None, None),
+                size=(250, 200),
+                pos_hint={"center_x": 0.5, "center_y": 0.5},  # center of father widget
+            )
+
+        popup = create_popup_window()
+        self.ids.canvas.add_widget(popup)
 
 
 class MainLayout(Widget):
@@ -83,17 +213,15 @@ class MainLayout(Widget):
     bases = []
     CENTIMETER_PER_PIXEL = 1  # how many centimeters a kivy pixel represents
 
-    tmp_pos = [120, 240]
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def settings_on(self):
+    def _on_settings_pressed(self):
         """Not used yet."""
-        self.ids.settings_img.source = "imgs/settings-outline-pressed.png"
         # self.ids.settings_btn.background_color = (0, 0, 0, 0)
+        self.ids.settings_img.source = "imgs/settings-outline-pressed.png"
 
-    def settings_off(self):
+    def on_settings_released(self):
         """Not used yet."""
         self.ids.settings_img.source = "imgs/settings-outline.png"
 
@@ -242,6 +370,7 @@ class MainLayout(Widget):
         self.update_tag_base_dist()
 
     def update_tag_base_dist(self):
+        """Update text of tag-base distances label on the window."""
         global tagBaseDist, tagPos
         self.ids.tag_distance.text = "Tag distance (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}".format(
             *tagBaseDist

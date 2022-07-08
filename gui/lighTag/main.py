@@ -213,6 +213,8 @@ class MainLayout(Widget):
     bases = []
     CENTIMETER_PER_PIXEL = 1  # how many centimeters a kivy pixel represents
 
+    tmp_pos = [120, 240]
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

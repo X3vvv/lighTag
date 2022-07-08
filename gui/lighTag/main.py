@@ -1,16 +1,9 @@
 from typing import Tuple
-import lighTag_Algorithm as lt
-import serial
-import serial.tools.list_ports
-import socket
+from random import random
 
-from kivy import Config
+from kivy.config import Config
 
-# set default window size and minumum size
-Config.set("graphics", "width", "450")
-Config.set("graphics", "height", "750")
-Config.set("graphics", "minimum_width", "450")
-Config.set("graphics", "minimum_height", "750")
+Config.read("./gui/lighTag/config.ini")
 
 from kivy.app import App
 from kivy.uix.widget import Widget
@@ -21,73 +14,35 @@ from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.clock import Clock
-from kivy.graphics import Line, Color
+from kivy.graphics import Line, Color, Ellipse
+from kivy.lang.builder import Builder
 
+Builder.load_file("main.kv")
 
-# ######## For WIFI ########
-print("Starts to connect socket.")
-
-c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-c.bind(("192.168.0.119", 8234))
-c.listen(10)
-client, address = c.accept()
-
-print("Socket connected.")
-# ######## For WIFI ########
-
-# ######## For serial port ########
-# ser = serial.Serial("/dev/cu.usbserial-110", 115200)
-# if ser.isOpen():
-#     print("Serial port connected.")
-#     print(ser.name)
-# else:
-#     print("Serial port failed to connect.")
-
-# ser = serial.Serial(port="/dev/cu.usbserial-110",
-#                     baudrate=115200,
-#                     bytesize=serial.EIGHTBITS,
-#                     parity=serial.PARITY_NONE,
-#                     stopbits=serial.STOPBITS_ONE,
-#                     timeout=0.5)
-# ######## For serial port ########
+# tag-base distances and postion of tag
+tagBaseDist = [
+    random() * 6.5 + 0.5,
+    random() * 6.5 + 0.5,
+    random() * 6.5 + 0.5,
+    random() * 6.5 + 0.5,
+]  # old name: inDisArr
+tagPos = [random() * 4.5, random() * 4.5, random() * 2]  # old name: tri
 
 
 def iot_callback(duration_after_last_call):
-    global inDisArr, tri
+    global tagBaseDist, tagPos
 
-    # Receive bytes from serial port
-    # bytes = ser.read(16)
+    # mimic distance between tag and bases is changing
+    for i in range(len(tagBaseDist)):
+        tagBaseDist[i] += random() - 0.5
 
-    # Receive bytes from WIFI
-    bytes = client.recv(1024)
-
-    print("Received bytes:", bytes.hex())
-    inDisArr = lt.getDis(
-        bytes.hex()
-    )  # Convert bytes to hex string and get the distance data
+    # mimic tag's coords change
+    for i in range(2):  # only change x & y coords, leave height
+        tagPos[i] += random() - 0.2
 
 
-#     print("After getDis", inDisArr)
-
-#     if inDisArr != -1:
-#         # print(inDisArr)
-#         tri = lt.triPosition(
-#             lt.XA,
-#             lt.YA,
-#             inDisArr[0],
-#             lt.XB,
-#             lt.YB,
-#             inDisArr[1],
-#             lt.XC,
-#             lt.YC,
-#             inDisArr[2],
-#         )
-#     else:
-#         print("Distance Error!")
-
-
-# Clock.schedule_interval(iot_callback, 0.5)
-# print("Kivy clock callback added.")
+Clock.schedule_interval(iot_callback, 0.5)
+print("Kivy clock callback added.")
 
 
 class Base:
@@ -128,14 +83,18 @@ class MainLayout(Widget):
     bases = []
     CENTIMETER_PER_PIXEL = 1  # how many centimeters a kivy pixel represents
 
+    tmp_pos = [120, 240]
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def settings_on(self):
+        """Not used yet."""
         self.ids.settings_img.source = "imgs/settings-outline-pressed.png"
         # self.ids.settings_btn.background_color = (0, 0, 0, 0)
 
     def settings_off(self):
+        """Not used yet."""
         self.ids.settings_img.source = "imgs/settings-outline.png"
 
     def add_base(self):
@@ -147,18 +106,21 @@ class MainLayout(Widget):
             size_hint=(None, None),
             size=(17, 17),
             # pos_hint={"x": 0.5, "y": 0.5},
-            pos=(0, 250),  # pos of left-bottom corner of the button
+            pos=(
+                0,
+                self.ids.control_panel.height,
+            ),  # pos of left-bottom corner of the button
             on_release=self._on_base_released,
         )
         self.bases.append(new_base)
-        canvas = self.ids.canvas
-        canvas.add_widget(new_base)
+        self.ids.canvas.add_widget(new_base)  # add widget to the canvas widget
         self.num_of_base += 1
 
     def _on_base_released(self, base_btn):
         """Callback function for when the base button is released. A popup window will be created."""
 
         def popup_confirm(confirm_btn):
+            """Callback function of confirm button in the base popup window."""
             # print(confirm_btn)
             x = y = z = 0
             if base_x.text.isdigit():
@@ -176,10 +138,11 @@ class MainLayout(Widget):
                 y = 0
             elif y > self.ids.canvas_temp_label.size[1] - 17:
                 y = self.ids.canvas_temp_label.size[1] - 17
-            base_btn.pos = [x, y + 250]
+            base_btn.pos = [x, y + self.ids.control_panel.height]
             self.ids.canvas.remove_widget(popup)
 
         def delete_base(delete_btn):
+            """Callback function of delete button in the base popup window."""
             # def confirm_delete_base(confirm_delete_btn):
             #     self.ids.canvas.remove_widget(doubleCheckPopup)
 
@@ -209,12 +172,16 @@ class MainLayout(Widget):
             # self.ids.canvas.add_widget(doubleCheckPopup)
             pass
 
+        # main layout of the popup window
         mainLayout = BoxLayout(orientation="vertical")
 
+        # layout which holds all the position information
         posLayout = GridLayout(cols=2)
+
         base_x = TextInput(multiline=False, text="0", font_size=10)
         base_y = TextInput(multiline=False, text="0", font_size=10)
         base_z = TextInput(multiline=False, text="0", font_size=10)
+
         posLayout.add_widget(Label(text="x:"))
         posLayout.add_widget(base_x)
         posLayout.add_widget(Label(text="y:"))
@@ -223,9 +190,13 @@ class MainLayout(Widget):
         posLayout.add_widget(base_z)
 
         mainLayout.add_widget(posLayout)
+
+        # add confirm button
         mainLayout.add_widget(
             Button(text="Confirm", size_hint=(1, 0.45), on_release=popup_confirm)
         )
+
+        # add delete button
         mainLayout.add_widget(
             Button(
                 text="Delete",
@@ -236,52 +207,48 @@ class MainLayout(Widget):
             )
         )
 
+        # add main layout to the popup window
         popup = Popup(
             title="Settings",
             content=mainLayout,
             size_hint=(None, None),
             size=(250, 200),
-            pos_hint={"center_x": 0.5, "center_y": 0.5},
+            pos_hint={"center_x": 0.5, "center_y": 0.5},  # center of father widget
         )
 
+        # add popup to the canvas
         self.ids.canvas.add_widget(popup)
 
-    tmp_pos = [120, 240]
-
     def debug(self):
-        global inDisArr, tri
-        for i in range(len(self.bases)):
-            print("base[{}]: {}]".format(i, self.bases[i].pos))
+        global tagBaseDist, tagPos
+
+        # DEBUG: print base position of the window
         if len(self.bases) <= 0:
             print("No base yet.")
+        else:
+            for i in range(len(self.bases)):
+                print("[base {}] pos on window: {}]".format(i, self.bases[i].pos))
 
-        # print(inDisArr, tri)
-        # print("Draw a circle at: ({}, {})...", tri[0], tri[1] + 250)
-        # self.draw_a_circle(tri[0], tri[1])
-        # print("Finish drawing!")
-        print("Draw a circle at: ({}, {})...", self.tmp_pos[0], self.tmp_pos[1] + 250)
-        self.draw_a_circle(*self.tmp_pos)
+        # DEBUG: print tagBaseDist & tagPos
+        print("Tag-base distances:\n\t {}\n\t {}\n\t {}\n\t {}".format(*tagBaseDist))
+        print("Tag location: {}".format(tagPos))
+
+        # print a circle at the tag location
+        print("Draw a circle at: ({}, {})...", tagPos[0], tagPos[1])
+        self.draw_a_circle(tagPos[0], tagPos[1])
         print("Finish drawing!")
-        from random import randint
 
-        self.tmp_pos[0] += randint(-5, 5)
-        self.tmp_pos[1] += randint(-5, 5)
-        # print("Starting schedule callbacks, interval: 1s")
-        # Clock.schedule_interval(self.draw_a_circle(*tri), 1)
-
-    def draw_a_circle(self, x, y):
+    def draw_a_circle(self, x, y, d=1):
+        """
+        Plot a circle on the canvas.
+        #Param
+        x: x-coords of the circle on the canvas
+        y: y-coords of the circle on the canvas
+        r: diameter of the circle
+        """
         with self.ids.canvas.canvas:
             Color(0.9, 0.1, 0.1, 0.9)
-            Line(
-                width=2,
-                circle=(x, y + 250, 1),
-            )
-
-    # def update_label_dist(self, arr):
-    #     print("UI:", arr)
-
-    # def update_label_pos(self, arr):
-    #     print("UI:", arr)
+            Ellipse(pos=(x, y), size=(d, d))
 
 
 class UIApp(App):

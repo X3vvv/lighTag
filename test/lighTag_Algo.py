@@ -384,17 +384,26 @@ class lighTagAlgo:
 def test():
     lt = lighTagAlgo()
     
+    lt.wifiConnect()
+    
     lt.setBaseACoor(0,0,2.0)
-    lt.setBaseBCoor(0,8.6,2.0)
-    lt.setBaseCCoor(5.6,8.6,2.0)
-    lt.setBaseDCoor(5.6,0.0,2.37)
+    lt.setBaseBCoor(0,8.535,2.0)
+    lt.setBaseCCoor(5.86,8.535,2.0)
+    lt.setBaseDCoor(5.86,0.0,2.69)
     
-    disArr = [5.83,5.39,4.36,3.0]
-    lt.setDistance(disArr)
     
-    lt.calculateTriPosition()
-    lt.calculateQuartPosition()
+    # disArr = [5.83,5.39,4.36,3.0]
+    # lt.setDistance(disArr)
     
-    print(lt.getCoor())
+    while True:
+        str = lt.getWifiData()
+        dis = lt.convertDistance(str)
+        if (dis != -1):
+            lt.calculateTriPosition()
+            lt.calculateQuartPosition()
+        else:
+            continue
+        print(lt.getCoor())
     
-test()
+if (__name__ == "__main__"):
+    test()

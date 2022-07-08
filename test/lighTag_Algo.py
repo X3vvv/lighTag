@@ -414,7 +414,7 @@ def test():
     lt = lighTagAlgo()
     
     # 2. Wifi connection
-    # lt.wifiConnect()
+    lt.wifiConnect()
     
     # 2. Or Serial connection
     # lt.serialConnect

@@ -407,6 +407,33 @@ class lighTagAlgo:
         """
         return [self.xA, self.yA, self.zA, self.xB, self.yB, self.zB, self.xC, self.yC, self.zC, self.xD, self.yD, self.zD]
     
+    def run(self):
+        out = list()
+        # 4. Get raw distance data from Wifi
+        str = self.getWifiData()
+        # 4.  Or Get raw distance data from serial
+        # str = lt.getSerialData()
+        
+        # debug
+        #print(str)
+        
+        # 5. convert the raw data to real distance data via side-effect
+        dis = self.convertDistance(str)
+        
+        # debug
+        #print(dis)
+        
+        # 6. Calculate the coordinates of the tag
+        if (dis != -1): # check if the distance is valid
+            out.append(dis)
+            self.calculateTriPosition() # calculate the coordinates of the tag
+            self.testPosition()
+            out.append(self.coorArr)
+            
+            return out
+        else:
+            return -1
+            
     
 def test():
     
@@ -425,7 +452,7 @@ def test():
     lt.setBaseCCoor(5.86,8.535,2.0)
     lt.setBaseDCoor(5.86,0.0,2.69)
     
-    # test
+    # for debug only
     # arr = [4.04,6.05,6.78,5.4]
     # lt.setDistance(arr)
     # lt.calculateTriPosition()
@@ -434,26 +461,7 @@ def test():
     
     # Loop
     while True:
-        # 4. Get raw distance data from Wifi
-        str = lt.getWifiData()
-        # 4.  Or Get raw distance data from serial
-        # str = lt.getSerialData()
-        
-        print(str)
-        
-        # 5. convert the raw data to real distance data via side-effect
-        dis = lt.convertDistance(str)
-        print(dis)
-        
-        # 6. Calculate the coordinates of the tag
-        if (dis != -1): # check if the distance is valid
-            lt.calculateTriPosition() # calculate the coordinates of the tag
-            lt.testPosition()
-            #lt.calculateQuartPosition() # calculate the coordinates of the tag
-        else:
-            continue
-        
-        print(lt.getCoor())
+        print(lt.run())
     
 if (__name__ == "__main__"):
     test()

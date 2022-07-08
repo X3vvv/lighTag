@@ -226,76 +226,6 @@ class lighTagAlgo:
         return [locx, locy]
     
     def calculateQuartPosition(self):
-        """Calculate the coordinates of the tag using the four base stations coordinates and the distance data, assign the result to self.coorArr
-
-        Args:
-            xP (float): x coordinate of the base station P
-            yP (float): y coordinate of the base station P
-            zP (float): z coordinate of the base station P
-            dP (float): distance between the tag and the base station P
-            ...
-
-        Returns:
-            arr (float[]): An array of length 3 containing the coordinates of the tag: [x, y, z]
-        """
-        
-        xa, ya, za, da, xb, yb, zb, db, xc, yc, zc, dc, xd, yd, zd, dd = self.xA, self.yA, self.zA, self.disArr[0],self.xB, self.yB, self.zB, self.disArr[1],self.xC, self.yC, self.zC, self.disArr[2],self.xD, self.yD, self.zD, self.disArr[3]
-        
-        x, y, z = sympy.symbols("x y z")
-
-        # List of equations
-        f1 = (
-            x * (2 * xa - 2 * xb)
-            + y * (2 * ya - 2 * yb)
-            + z * (2 * za - 2 * zb)
-            - (
-                np.square(xa)
-                - np.square(xb)
-                + np.square(ya)
-                - np.square(yb)
-                + np.square(za)
-                - np.square(zb)
-                - da * da
-                + db * db
-            )
-        )
-        f2 = (
-            x * (2 * xa - 2 * xc)
-            + y * (2 * ya - 2 * yc)
-            + z * (2 * za - 2 * zc)
-            - (
-                np.square(xa)
-                - np.square(xc)
-                + np.square(ya)
-                - np.square(yc)
-                + np.square(za)
-                - np.square(zc)
-                - da * da
-                + dc * dc
-            )
-        )
-        f3 = (
-            x * (2 * xa - 2 * xd)
-            + y * (2 * ya - 2 * yd)
-            + z * (2 * za - 2 * zd)
-            - (
-                np.square(xa)
-                - np.square(xd)
-                + np.square(ya)
-                - np.square(yd)
-                + np.square(za)
-                - np.square(zd)
-                - da * da
-                + dd * dd
-            )
-        )
-
-        # Solve the equations
-        (out,) = sympy.linsolve([f1, f2, f3], [x, y, z])  # tuple
-        self.coorArr = list(out)
-        return list(out)
-    
-    def testPosition(self):
         [a,b] = self.calculateTriPosition()
         z1 = sympy.symbols("z1")
         f1 = np.square(a-self.xD)+np.square(b-self.yD)+np.square(z1-self.zD)-np.square(self.disArr[3])
@@ -323,6 +253,8 @@ class lighTagAlgo:
         elif min0 == min4:
             out = (list(rst1)[1] + list(rst2)[1])/2
             
+        out = complex(out).real
+        
         coor = [a,b,out]
         self.coorArr = coor
         return coor
@@ -426,10 +358,9 @@ class lighTagAlgo:
         # 6. Calculate the coordinates of the tag
         if (dis != -1): # check if the distance is valid
             out.append(dis)
-            self.calculateTriPosition() # calculate the coordinates of the tag
-            self.testPosition()
+            # self.calculateTriPosition() # calculate the coordinates of the tag
+            self.calculateQuartPosition()
             out.append(self.coorArr)
-            
             return out
         else:
             return -1
@@ -456,7 +387,7 @@ def test():
     # arr = [4.04,6.05,6.78,5.4]
     # lt.setDistance(arr)
     # lt.calculateTriPosition()
-    # lt.testPosition()
+    # lt.calculateQuartPosition()
     # print(lt.getCoor())
     
     # Loop

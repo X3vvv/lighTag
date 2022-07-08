@@ -4,7 +4,6 @@ from mpmath.functions.functions import re
 import sympy
 import numpy as np
 from numpy import *
-
 import serial
 import serial.tools.list_ports
 
@@ -340,33 +339,51 @@ class lighTagAlgo:
         return [self.xA, self.yA, self.zA, self.xB, self.yB, self.zB, self.xC, self.yC, self.zC, self.xD, self.yD, self.zD]
     
     def run(self):
-        out = list()
+        """The main entrance of the function, step 4 to 6, wait to be called repeatedly
+        
+        !!!!! 
+        Instantiate an lighTagAlgo object (Step 1),
+        Wifi/Serial connection (Step 2), and
+        Set coordinates of four base stations (Step 3)
+        should be called once BEFORE using this function.
+        !!!!!
+
+        Returns:
+            out[2D list]: [[distance_AT, distance_BT, distance_CT, distance_DT],[coor_x, coor_y, coor_z]]
+            or, -1 for error, need to be checked and skipped
+        """
+        out = list() # [[distance_AT, distance_BT, distance_CT, distance_DT],[coor_x, coor_y, coor_z]]
+        
         # 4. Get raw distance data from Wifi
         str = self.getWifiData()
         # 4.  Or Get raw distance data from serial
         # str = lt.getSerialData()
         
-        # debug
-        #print(str)
+        # for debug only
+        # print(str)
         
         # 5. convert the raw data to real distance data via side-effect
         dis = self.convertDistance(str)
         
-        # debug
-        #print(dis)
+        # for debug only
+        # print(dis)
         
         # 6. Calculate the coordinates of the tag
         if (dis != -1): # check if the distance is valid
-            out.append(dis)
-            # self.calculateTriPosition() # calculate the coordinates of the tag
-            self.calculateQuartPosition()
-            out.append(self.coorArr)
+            out.append(dis) # add the distance to the output
+            self.calculateQuartPosition() # calculate the coordinates of the tag
+            out.append(self.coorArr) # add the coordinates to the output
             return out
         else:
             return -1
             
     
 def test():
+    """
+    Referenced SOP
+    Below are Step 1 to 3, need to be called only once before using the function run(),
+    Step 4 to 6 are in the function run(), need to be called repeatedly
+    """
     
     # 1. Instantiate an lighTagAlgo object
     lt = lighTagAlgo()
@@ -375,7 +392,7 @@ def test():
     lt.wifiConnect()
     
     # 2. Or Serial connection
-    # lt.serialConnect
+    # lt.serialConnect()
     
     # 3. Set the coordinates of four base stations
     lt.setBaseACoor(0,0,2.0)

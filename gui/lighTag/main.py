@@ -238,7 +238,16 @@ class MainLayout(Widget):
         self.draw_a_circle(tagPos[0], tagPos[1])
         print("Finish drawing!")
 
-    def draw_a_circle(self, x, y, d=1):
+        # change tag-base distance labels
+        self.update_tag_base_dist()
+
+    def update_tag_base_dist(self):
+        global tagBaseDist, tagPos
+        self.ids.tag_distance.text = "Tag distance (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}".format(
+            *tagBaseDist
+        )
+
+    def draw_a_circle(self, x, y, d=5):
         """
         Plot a circle on the canvas.
         #Param
@@ -248,7 +257,7 @@ class MainLayout(Widget):
         """
         with self.ids.canvas.canvas:
             Color(0.9, 0.1, 0.1, 0.9)
-            Ellipse(pos=(x, y), size=(d, d))
+            Ellipse(pos=(x, y + self.ids.canvas.height), size=(d, d))
 
 
 class UIApp(App):

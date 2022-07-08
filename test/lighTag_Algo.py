@@ -1,5 +1,6 @@
 import socket
 import codecs
+from mpmath.functions.functions import re
 import sympy
 import numpy as np
 from numpy import *
@@ -9,7 +10,7 @@ import serial.tools.list_ports
 
 class lighTagAlgo:
     """
-    Default Four Base Station Coordinates
+    Four Default Base Station Coordinates
     
     Note that if all four z-coordinates are the same, 
     then the x, y and z of the fourth point can be directly implied, 
@@ -294,7 +295,38 @@ class lighTagAlgo:
         self.coorArr = list(out)
         return list(out)
     
-    
+    def testPosition(self):
+        [a,b] = self.calculateTriPosition()
+        z1 = sympy.symbols("z1")
+        f1 = np.square(a-self.xD)+np.square(b-self.yD)+np.square(z1-self.zD)-np.square(self.disArr[3])
+        rst1 = sympy.solve(f1,z1)
+        
+        z2 = sympy.symbols("z2")
+        f2 = np.square(a-self.xB)+np.square(b-self.yB)+np.square(z2-self.zB)-np.square(self.disArr[1])
+        rst2 = sympy.solve(f2,z2)
+        
+        min1 = abs(list(rst1)[0]-list(rst2)[0])
+        min2 = abs(list(rst1)[0]-list(rst2)[1])
+        min3 = abs(list(rst1)[1]-list(rst2)[0])
+        min4 = abs(list(rst1)[1]-list(rst2)[1])
+        
+        min0 = min(min1,min2,min3,min4)
+        
+        out = 0
+        
+        if min0 == min1:
+            out = (list(rst1)[0] + list(rst2)[0])/2
+        elif min0 == min2:
+            out = (list(rst1)[0] + list(rst2)[1])/2
+        elif min0 == min3:
+            out = (list(rst1)[1] + list(rst2)[0])/2
+        elif min0 == min4:
+            out = (list(rst1)[1] + list(rst2)[1])/2
+            
+        coor = [a,b,out]
+        self.coorArr = coor
+        return coor
+            
     def getCoor(self):
         """return the coordinates of the tag
 
@@ -377,32 +409,50 @@ class lighTagAlgo:
     
     
 def test():
+    
+    # 1. Instantiate an lighTagAlgo object
     lt = lighTagAlgo()
     
-    lt.wifiConnect()
+    # 2. Wifi connection
+    # lt.wifiConnect()
     
+    # 2. Or Serial connection
+    # lt.serialConnect
+    
+    # 3. Set the coordinates of four base stations
     lt.setBaseACoor(0,0,2.0)
     lt.setBaseBCoor(0,8.535,2.0)
     lt.setBaseCCoor(5.86,8.535,2.0)
     lt.setBaseDCoor(5.86,0.0,2.69)
     
-    
-    # disArr = [5.83,5.39,4.36,3.0]
-    # lt.setDistance(disArr)
+    # test
+    # arr = [4.04,6.05,6.78,5.4]
+    # lt.setDistance(arr)
     # lt.calculateTriPosition()
-    # lt.calculateQuartPosition()
+    # lt.testPosition()
     # print(lt.getCoor())
     
+    # Loop
     while True:
+        # 4. Get raw distance data from Wifi
         str = lt.getWifiData()
+        # 4.  Or Get raw distance data from serial
+        # str = lt.getSerialData()
+        
         print(str)
+        
+        # 5. convert the raw data to real distance data via side-effect
         dis = lt.convertDistance(str)
         print(dis)
-        if (dis != -1):
-            lt.calculateTriPosition()
-            lt.calculateQuartPosition()
+        
+        # 6. Calculate the coordinates of the tag
+        if (dis != -1): # check if the distance is valid
+            lt.calculateTriPosition() # calculate the coordinates of the tag
+            lt.testPosition()
+            #lt.calculateQuartPosition() # calculate the coordinates of the tag
         else:
             continue
+        
         print(lt.getCoor())
     
 if (__name__ == "__main__"):

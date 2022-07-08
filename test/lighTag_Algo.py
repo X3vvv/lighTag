@@ -16,16 +16,16 @@ class lighTagAlgo:
     so the fourth z should be different in order to form a 3D-perceived environment
     """
     # (x,y,z) for base A
-    XA, YA, ZA = 0.0, 0.0, 2.0
+    xA, yA, zA = 0.0, 0.0, 2.0
 
     # (x,y,z) for base B
-    XB, YB, ZB = 0.0, 8.6, 2.0
+    xB, yB, zB = 0.0, 8.6, 2.0
 
     # (x,y,z) for base C
-    XC, YC, ZC = 5.6, 8.6, 2.0
+    xC, yC, zC = 5.6, 8.6, 2.0
 
     # (x,y,z) for base D
-    XD, YD, ZD = 5.6, 0.0, 2.37
+    xD, yD, zD = 5.6, 0.0, 2.37
     
     # (TA, TB, TC, TD) for four distances
     disArr = [0.0, 0.0, 0.0, 0.0]
@@ -157,7 +157,7 @@ class lighTagAlgo:
                             return -1
                     arr.append(out)
                     
-            self.disArr = arr
+            self.disArr = arr[7::2]
             return arr[7::2]  # Return the real distance data (high 8 bits distance + low 8 bits distance)
         else:
             return -1
@@ -194,9 +194,7 @@ class lighTagAlgo:
         Returns:
             arr (float[]): An array of length 2 containing the coordinates of the tag: [x, y]
         """
-        xa, ya, da, xb, yb, db, xc, yc, dc = (self.XA, self.YA, self.disArr[0], 
-                                            self.XB, self.YB, self.disArr[1], 
-                                            self.XC, self.YC, self.disArr[2])
+        xa, ya, da, xb, yb, db, xc, yc, dc = self.xA, self.yA, self.disArr[0], self.xB, self.yB, self.disArr[1], self.xC, self.yC, self.disArr[2]
         
         x, y = sympy.symbols("x y")
 
@@ -240,10 +238,7 @@ class lighTagAlgo:
             arr (float[]): An array of length 3 containing the coordinates of the tag: [x, y, z]
         """
         
-        xa, ya, za, da, xb, yb, zb, db, xc, yc, zc, dc, xd, yd, zd, dd = (self.XA, self.YA, self.ZA, self.disArr[0],
-                                                                          self.XB, self.YB, self.ZB, self.disArr[1],
-                                                                          self.XC, self.YC, self.ZC, self.disArr[2],
-                                                                          self.XD, self.YD, self.ZD, self.disArr[3])
+        xa, ya, za, da, xb, yb, zb, db, xc, yc, zc, dc, xd, yd, zd, dd = self.xA, self.yA, self.zA, self.disArr[0],self.xB, self.yB, self.zB, self.disArr[1],self.xC, self.yC, self.zC, self.disArr[2],self.xD, self.yD, self.zD, self.disArr[3]
         
         x, y, z = sympy.symbols("x y z")
 
@@ -319,9 +314,9 @@ class lighTagAlgo:
         Returns:
             Boolean: True for success
         """
-        self.XA = x
-        self.YA = y
-        self.ZA = z
+        self.xA = x
+        self.yA = y
+        self.zA = z
         return True
     
     def setBaseBCoor(self,x,y,z):
@@ -335,9 +330,9 @@ class lighTagAlgo:
         Returns:
             Boolean: True for success
         """
-        self.XB = x
-        self.YB = y
-        self.ZB = z
+        self.xB = x
+        self.yB = y
+        self.zB = z
         return True
     
     def setBaseCCoor(self,x,y,z):
@@ -351,9 +346,9 @@ class lighTagAlgo:
         Returns:
             Boolean: True for success
         """
-        self.XC = x
-        self.YC = y
-        self.ZC = z
+        self.xC = x
+        self.yC = y
+        self.zC = z
         return True
     
     def setBaseDCoor(self,x,y,z):
@@ -367,9 +362,9 @@ class lighTagAlgo:
         Returns:
             Boolean: True for success
         """
-        self.XD = x
-        self.YD = y
-        self.ZD = z
+        self.xD = x
+        self.yD = y
+        self.zD = z
         return True
     
     def getFourBaseCoor(self):
@@ -378,7 +373,7 @@ class lighTagAlgo:
         Returns:
             list: [xa, ya, za, xb, yb, zb, xc, yc, zc, xd, yd, zd]
         """
-        return [self.XA, self.YA, self.ZA, self.XB, self.YB, self.ZB, self.XC, self.YC, self.ZC, self.XD, self.YD, self.ZD]
+        return [self.xA, self.yA, self.zA, self.xB, self.yB, self.zB, self.xC, self.yC, self.zC, self.xD, self.yD, self.zD]
     
     
 def test():
@@ -394,10 +389,15 @@ def test():
     
     # disArr = [5.83,5.39,4.36,3.0]
     # lt.setDistance(disArr)
+    # lt.calculateTriPosition()
+    # lt.calculateQuartPosition()
+    # print(lt.getCoor())
     
     while True:
         str = lt.getWifiData()
+        print(str)
         dis = lt.convertDistance(str)
+        print(dis)
         if (dis != -1):
             lt.calculateTriPosition()
             lt.calculateQuartPosition()

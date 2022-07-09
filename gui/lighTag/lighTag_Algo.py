@@ -234,12 +234,16 @@ class lighTagAlgo:
         f2 = np.square(a-self.xB)+np.square(b-self.yB)+np.square(z2-self.zB)-np.square(self.disArr[1])
         rst2 = sympy.solve(f2,z2)
         
-        min1 = abs(list(rst1)[0]-list(rst2)[0])
-        min2 = abs(list(rst1)[0]-list(rst2)[1])
-        min3 = abs(list(rst1)[1]-list(rst2)[0])
-        min4 = abs(list(rst1)[1]-list(rst2)[1])
+        if (list(rst1)[0]>list(rst1)[1]):
+            list(rst1)[0],list(rst1)[1] = list(rst1)[1],list(rst1)[0]
+            
+        if (list(rst2)[0]>list(rst2)[1]):
+            list(rst2)[0],list(rst2)[1] = list(rst2)[1],list(rst2)[0]
         
-        min0 = min(min1,min2,min3,min4)
+        min1 = abs(list(rst1)[0]-list(rst2)[0])
+        min2 = abs(list(rst1)[1]-list(rst2)[1])
+        
+        min0 = min(min1,min2)
         
         out = 0
         
@@ -247,10 +251,6 @@ class lighTagAlgo:
             out = (list(rst1)[0] + list(rst2)[0])/2
         elif min0 == min2:
             out = (list(rst1)[0] + list(rst2)[1])/2
-        elif min0 == min3:
-            out = (list(rst1)[1] + list(rst2)[0])/2
-        elif min0 == min4:
-            out = (list(rst1)[1] + list(rst2)[1])/2
             
         out = complex(out).real
         

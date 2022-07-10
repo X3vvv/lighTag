@@ -1,4 +1,4 @@
-from typing import Tuple
+from multiprocessing.sharedctypes import Value
 from random import random
 
 from kivy.config import Config
@@ -26,7 +26,7 @@ tagBaseDist = [
     random() * 6.5 + 0.5,
     random() * 6.5 + 0.5,
 ]  # old name: inDisArr
-tagPos = [random() * 4.5, random() * 4.5, random() * 2]  # old name: tri
+tagPos = [random() * 45, random() * 45, random() * 20]  # old name: tri
 
 
 def iot_callback(duration_after_last_call):
@@ -34,11 +34,11 @@ def iot_callback(duration_after_last_call):
 
     # mimic distance between tag and bases is changing
     for i in range(len(tagBaseDist)):
-        tagBaseDist[i] += random() - 0.5
+        tagBaseDist[i] += random() * 6 - 3
 
     # mimic tag's coords change
     for i in range(2):  # only change x & y coords, leave height
-        tagPos[i] += random() - 0.2
+        tagPos[i] += random() * 6 - 3
 
 
 Clock.schedule_interval(iot_callback, 0.5)
@@ -213,6 +213,9 @@ class MainLayout(Widget):
     bases = []
     CENTIMETER_PER_PIXEL = 1  # how many centimeters a kivy pixel represents
 
+    draw_path_has_started = False
+    draw_path_event = None
+
     tmp_pos = [120, 240]
 
     def __init__(self, **kwargs):
@@ -352,6 +355,9 @@ class MainLayout(Widget):
     def debug(self):
         global tagBaseDist, tagPos
 
+        def draw_path_callback(duration_after_last_call):
+            self.draw_a_circle(tagPos[0], tagPos[1])
+
         # DEBUG: print base position of the window
         if len(self.bases) <= 0:
             print("No base yet.")
@@ -364,12 +370,25 @@ class MainLayout(Widget):
         print("Tag location: {}".format(tagPos))
 
         # print a circle at the tag location
-        print("Draw a circle at: ({}, {})...", tagPos[0], tagPos[1])
-        self.draw_a_circle(tagPos[0], tagPos[1])
-        print("Finish drawing!")
+        # print("Draw a circle at: ({}, {})...", tagPos[0], tagPos[1])
+        # self.draw_a_circle(tagPos[0], tagPos[1])
+        # print("Finish drawing!")
 
         # change tag-base distance labels
         self.update_tag_base_dist()
+
+        if self.draw_path_has_started:
+            if self.draw_path_event is None:
+                raise ValueError(
+                    "draw_path_event is supposed to be a event but None value is detected."
+                )
+            self.draw_path_event.cancel()
+            self.draw_path_has_started = False
+            print("-- Draw path event has been cancelled")
+        else:
+            self.draw_path_event = Clock.schedule_interval(draw_path_callback, 1)
+            self.draw_path_has_started = True
+            print("-- Draw path event has started")
 
     def update_tag_base_dist(self):
         """Update text of tag-base distances label on the window."""

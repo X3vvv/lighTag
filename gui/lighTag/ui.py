@@ -17,7 +17,7 @@ from kivy.clock import Clock
 from kivy.graphics import Line, Color, Ellipse
 from kivy.lang.builder import Builder
 
-Builder.load_file("main.kv")
+Builder.load_file("ui.kv")
 
 # tag-base distances and postion of tag
 tagBaseDist = [

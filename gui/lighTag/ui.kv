@@ -21,7 +21,7 @@
             height: 60
             padding: 20
 
-            Label:
+            Label:  # app name label
                 id: app_name_label
                 text: "lighTag"
                 font_size: 18
@@ -41,7 +41,7 @@
                 #         size: self.size
                 #         pos: self.pos
 
-            Label:
+            Label:  # head\nav spaceholder
                 id: head_nav_spaceholder
                 text: ''
                 # canvas.before:
@@ -51,13 +51,13 @@
                 #         size: self.size
                 #         pos: self.pos
 
-            # Button:
+            # Button:  # settings btn
             #     id: settings_btn
             #     size_hint: (.1, 1)
             #     background_color: (0, 0, 0, 0)
 
-            #     on_press: root.settings_on()
-            #     on_release: root.settings_off()
+            #     on_press: root._on_settings_pressed()
+            #     on_release: root._on_settings_released()
 
             #     Image:
             #         id: settings_img
@@ -83,7 +83,7 @@
 
             Label:
                 id: canvas_size_label
-                text: '{}cm x {}cm '.format(*canvas_temp_label.size)
+                text: '{}cm x {}cm '.format(canvas_temp_label.size[0] / root.CENTIMETER_PER_PIXEL, canvas_temp_label.size[1] / root.CENTIMETER_PER_PIXEL)
                 font_size: 12
                 size_hint: (None, None)
                 size: self.texture_size
@@ -115,15 +115,21 @@
                     on_release: root.add_base()
 
                 Label:
-                    id: "tag distance"
-                    text: "Tag distance (m)\n" "base1:  3.78\n" "base2:  0.43\n" "base3:  7.01\n" "base4:  5.26\n"
+                    id: tag_distance
+                    # text: "Tag distance (m)\n" "base1:  3.78\n" "base2:  0.43\n" "base3:  7.01\n" "base4:  5.26\n"
+                    text: ""
                     font_size: 12
 
             BoxLayout:  # right part
                 orientation: "vertical"
 
                 Button:
-                    id: "control panel right part placeholder"
-                    text: "not used"
-                    # size: root.width, root.height
+                    id: start_plotting_path_btn
+                    text: "START plotting path"
+                    on_release: root.on_plot_path_released()
+
+                Button:
+                    id: debug_btn
+                    text: "debug"
                     background_color: (0.2, 0.2, 0.2, 1)
+                    on_release: root.debug()

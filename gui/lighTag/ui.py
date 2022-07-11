@@ -1,24 +1,26 @@
 from random import random
-import backend
 
 from kivy.config import Config
+
+import backend
 
 Config.read("./gui/lighTag/config.ini")
 
 from kivy.app import App
-from kivy.uix.widget import Widget
+from kivy.clock import Clock
+from kivy.graphics import Color, Ellipse, Line
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.uix.textinput import TextInput
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.clock import Clock
-from kivy.graphics import Line, Color, Ellipse
+from kivy.uix.textinput import TextInput
+from kivy.uix.widget import Widget
 
 # from kivy.lang.builder import Builder
-
 # Builder.load_file("ui.kv")
+
+DEBUG_UI = True  # if True, won't connect backend, run simulation data instead
 
 
 class Base:
@@ -206,28 +208,54 @@ class MainLayout(Widget):
         Clock.schedule_interval(lambda dt: self.update_tag_base_dist(), self.INTERVAL)
 
     def start_backend(self):
-        lt = backend.lighTagAlgo()
-        lt.wifiConnect()
-        lt.setBaseACoor(0, 0, 2.0)
-        lt.setBaseBCoor(0, 8.535, 2.0)
-        lt.setBaseCCoor(5.86, 8.535, 2.0)
-        lt.setBaseDCoor(5.86, 0.0, 2.355)
-        Clock.schedule_interval(lambda dt: lt.run(), self.INTERVAL)
-        self.lt = lt
+        if DEBUG_UI:
+            self.tagPos = [2, 2, 2]
+            self.tagBaseDist = [7.777, 7.777, 7.777, 7.777]
+
+            def gen_simulate_data():
+                # simulate tagPos change
+                xy_delta = 1
+                z_delta = 1
+                self.tagPos[0] += random() * xy_delta - xy_delta / 2
+                self.tagPos[1] += random() * xy_delta - xy_delta / 2
+                self.tagPos[2] += random() * z_delta - z_delta / 2
+
+                # simulate tagBaseDist change
+                dist_delta = 1
+                for i in range(len(self.tagBaseDist)):
+                    self.tagBaseDist[i] += random() * dist_delta - dist_delta / 2
+
+            Clock.schedule_interval(lambda dt: gen_simulate_data(), self.INTERVAL)
+
+        else:
+            lt = backend.lighTagAlgo()
+            lt.wifiConnect()
+            lt.setBaseACoor(0, 0, 2.0)
+            lt.setBaseBCoor(0, 8.535, 2.0)
+            lt.setBaseCCoor(5.86, 8.535, 2.0)
+            lt.setBaseDCoor(5.86, 0.0, 2.355)
+            Clock.schedule_interval(lambda dt: lt.run(), self.INTERVAL)
+            self.lt = lt
+        print("Starting backend")
 
     def update_tag_base_dist(self):
         """Update text of tag-base distances label on the window."""
-        self.tagBaseDist = self.lt.getDistance()
-        tmp = self.lt.getCoor()
-        # self.tagPos = self.lt.getCoor()
-        for i in range(len(tmp)):
-            self.tagPos[i] = (
-                tmp[i] * 100 / self.CENTIMETER_PER_PIXEL
-            )  # m * cm/m / cm/px
+        if DEBUG_UI:
+            self.tagBaseDist = self.tagBaseDist
+            self.tagPos = self.tagPos
+        else:
+            self.tagBaseDist = self.lt.getDistance()
+            self.tagPos = self.lt.getCoor()
+
         self.ids.tag_distance.text = "Tag distance (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}".format(
             *self.tagBaseDist
         )
-        print(self.tagPos)
+
+        print(
+            "Tag: x={:.1f}m, y={:.1f}m, h={:.1f}m [({:.1f}, {:.1f}) pixel]".format(
+                *self.tagPos, *self.get_tag_pixel_pos()[:2]
+            )
+        )
 
     def _on_settings_pressed(self):
         """Not used yet."""
@@ -361,22 +389,17 @@ class MainLayout(Widget):
         self.ids.canvas.add_widget(popup)
 
     def debug(self):
-        # DEBUG: print base position of the window
+        # DEBUG: print base position (of the window)
+        print("Base details:")
         if len(self.bases) <= 0:
-            print("No base yet.")
+            print("\tNo base yet.")
         else:
             for i in range(len(self.bases)):
-                print("[base {}] pos on window: {}]".format(i, self.bases[i].pos))
-
-        # DEBUG: print tagBaseDist & tagPos
-        print(
-            "Tag-base distances:\n\t {}\n\t {}\n\t {}\n\t {}".format(*self.tagBaseDist)
-        )
-        print("Tag location: {}".format(self.tagPos))
+                print("\t[base {}] pos on window: {}]".format(i, self.bases[i].pos))
 
     def on_plot_path_released(self):
         def draw_path_callback(duration_after_last_call):
-            self.draw_a_circle(self.tagPos[0], self.tagPos[1])
+            self.draw_a_circle(*self.get_tag_pixel_pos()[:2])
 
         if self.draw_path_has_started:  # IS drawing path, will stop drawing
             if self.draw_path_event is None:
@@ -401,10 +424,17 @@ class MainLayout(Widget):
         y: y-coords of the circle on the canvas
         r: diameter of the circle
         """
-        print("Draw a circle at: [{}, {}]".format(x, y))
+        # print("Draw a circle at: [{}, {}]".format(x, y))
         with self.ids.canvas.canvas:
             Color(0.9, 0.1, 0.1, 0.9)
             Ellipse(pos=(x, y + self.ids.control_panel.height), size=(d, d))
+
+    def get_tag_pixel_pos(self):
+        """Get tag position in pixel (unit: meter -> pixel)."""
+        tmp = self.tagPos.copy()
+        for i in range(len(tmp)):
+            tmp[i] = tmp[i] * 100 / self.CENTIMETER_PER_PIXEL  # m * cm/m / cm/px
+        return tmp
 
 
 class UIApp(App):

@@ -83,7 +83,7 @@
 
             Label:
                 id: canvas_size_label
-                text: '{}cm x {}cm '.format(canvas_temp_label.size[0] / root.CENTIMETER_PER_PIXEL, canvas_temp_label.size[1] / root.CENTIMETER_PER_PIXEL)
+                text: '{:.1f}cm x {:.1f}cm '.format(canvas_temp_label.size[0] * root.CENTIMETER_PER_PIXEL, canvas_temp_label.size[1] * root.CENTIMETER_PER_PIXEL)
                 font_size: 12
                 size_hint: (None, None)
                 size: self.texture_size

@@ -53,7 +53,7 @@ class lighTagAlgo:
         print("Starts to connect socket.")
 
         self.c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.c.bind(("192.168.0.119", 8234))
+        self.c.bind(("192.168.0.114", 8234))
         self.c.listen(10)
         self.client, self.address = self.c.accept()
 

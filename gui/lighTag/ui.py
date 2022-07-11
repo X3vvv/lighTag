@@ -1,4 +1,5 @@
 from random import random
+import backend
 
 from kivy.config import Config
 
@@ -17,31 +18,6 @@ from kivy.graphics import Line, Color, Ellipse
 from kivy.lang.builder import Builder
 
 Builder.load_file("ui.kv")
-
-# tag-base distances and postion of tag
-tagBaseDist = [
-    random() * 6.5 + 0.5,
-    random() * 6.5 + 0.5,
-    random() * 6.5 + 0.5,
-    random() * 6.5 + 0.5,
-]  # old name: inDisArr
-tagPos = [random() * 45, random() * 45, random() * 20]  # old name: tri
-
-
-def iot_callback(duration_after_last_call):
-    global tagBaseDist, tagPos
-
-    # mimic distance between tag and bases is changing
-    for i in range(len(tagBaseDist)):
-        tagBaseDist[i] += random() * 6 - 3
-
-    # mimic tag's coords change
-    for i in range(2):  # only change x & y coords, leave height
-        tagPos[i] += random() * 6 - 3
-
-
-Clock.schedule_interval(iot_callback, 0.5)
-print("Kivy clock callback added.")
 
 
 class Base:
@@ -219,7 +195,30 @@ class MainLayout(Widget):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.tagPos = [0, 0, 0]
+        self.tagBaseDist = [0, 0, 0, 0]
+
+        self.start_backend()
         Clock.schedule_interval(self.update_tag_base_dist, 0.5)
+
+    def start_backend(self):
+        lt = backend.lighTagAlgo()
+        lt.wifiConnect()
+        lt.setBaseACoor(0, 0, 2.0)
+        lt.setBaseBCoor(0, 8.535, 2.0)
+        lt.setBaseCCoor(5.86, 8.535, 2.0)
+        lt.setBaseDCoor(5.86, 0.0, 2.69)
+        Clock.schedule_interval(lt.run, 0.45)
+        self.lt = lt
+
+    def update_tag_base_dist(self, *args):
+        """Update text of tag-base distances label on the window."""
+        self.tagBaseDist = self.lt.getDistance()
+        self.tagPos = self.lt.calculateTriPosition()
+        self.ids.tag_distance.text = "Tag distance (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}".format(
+            *self.tagBaseDist
+        )
 
     def _on_settings_pressed(self):
         """Not used yet."""
@@ -353,8 +352,6 @@ class MainLayout(Widget):
         self.ids.canvas.add_widget(popup)
 
     def debug(self):
-        global tagBaseDist, tagPos
-
         # DEBUG: print base position of the window
         if len(self.bases) <= 0:
             print("No base yet.")
@@ -363,14 +360,14 @@ class MainLayout(Widget):
                 print("[base {}] pos on window: {}]".format(i, self.bases[i].pos))
 
         # DEBUG: print tagBaseDist & tagPos
-        print("Tag-base distances:\n\t {}\n\t {}\n\t {}\n\t {}".format(*tagBaseDist))
-        print("Tag location: {}".format(tagPos))
+        print(
+            "Tag-base distances:\n\t {}\n\t {}\n\t {}\n\t {}".format(*self.tagBaseDist)
+        )
+        print("Tag location: {}".format(self.tagPos))
 
     def on_plot_path_released(self):
-        global tagBaseDist, tagPos
-
         def draw_path_callback(duration_after_last_call):
-            self.draw_a_circle(tagPos[0], tagPos[1])
+            self.draw_a_circle(self.tagPos[0], self.tagPos[1])
 
         if self.draw_path_has_started:  # IS drawing path, will stop drawing
             if self.draw_path_event is None:
@@ -386,15 +383,6 @@ class MainLayout(Widget):
             self.draw_path_has_started = True
             self.ids.start_plotting_path_btn.text = "STOP plotting path"
             print("-- Draw path event has started")
-
-    def update_tag_base_dist(self, *args):
-        """Update text of tag-base distances label on the window."""
-        global tagBaseDist, tagPos
-        self.ids.tag_distance.text = "Tag distance (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}".format(
-            *tagBaseDist
-        )
-
-        print(self.ids.tag_distance.text)
 
     def draw_a_circle(self, x, y, d=5):
         """

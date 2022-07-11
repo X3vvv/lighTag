@@ -234,10 +234,10 @@ class lighTagAlgo:
         f2 = np.square(a-self.xB)+np.square(b-self.yB)+np.square(z2-self.zB)-np.square(self.disArr[1])
         rst2 = sympy.solve(f2,z2)
         
-        if (list(rst1)[0]>list(rst1)[1]):
+        if (complex(list(rst1)[0]).real>complex(list(rst1)[1]).real):
             list(rst1)[0],list(rst1)[1] = list(rst1)[1],list(rst1)[0]
             
-        if (list(rst2)[0]>list(rst2)[1]):
+        if (complex(list(rst2)[0]).real>complex(list(rst2)[1]).real):
             list(rst2)[0],list(rst2)[1] = list(rst2)[1],list(rst2)[0]
         
         min1 = abs(list(rst1)[0]-list(rst2)[0])
@@ -398,7 +398,7 @@ def test():
     lt.setBaseACoor(0,0,2.0)
     lt.setBaseBCoor(0,8.535,2.0)
     lt.setBaseCCoor(5.86,8.535,2.0)
-    lt.setBaseDCoor(5.86,0.0,2.69)
+    lt.setBaseDCoor(5.86,0.0,2.355)
     
     # for debug only
     # arr = [4.04,6.05,6.78,5.4]

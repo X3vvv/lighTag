@@ -6,6 +6,7 @@ import numpy as np
 from numpy import *
 import serial
 import serial.tools.list_ports
+import time
 
 
 class lighTagAlgo:
@@ -101,6 +102,12 @@ class lighTagAlgo:
         For WIFI data
         """
         bytes = self.client.recv(1024)
+        print(
+            "[{}.{}]: ".format(
+                time.strftime("%H:%M:%S", time.localtime()), int(time.time() * 10) % 10
+            ),
+            end="",
+        )
         return bytes.hex()
 
     def getSerialData(self):
@@ -396,7 +403,8 @@ class lighTagAlgo:
         dis = self.convertDistance(str)
 
         if dis != -1:  # check if the distance is valid
-            self.calculateQuartPosition()  # calculate the coordinates of the tag
+            return self.calculateQuartPosition()  # calculate the coordinates of the tag
+        return -1
 
 
 def test():

@@ -1,4 +1,3 @@
-from multiprocessing.sharedctypes import Value
 from random import random
 
 from kivy.config import Config

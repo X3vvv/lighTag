@@ -15,9 +15,10 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.clock import Clock
 from kivy.graphics import Line, Color, Ellipse
-from kivy.lang.builder import Builder
 
-Builder.load_file("ui.kv")
+# from kivy.lang.builder import Builder
+
+# Builder.load_file("ui.kv")
 
 
 class Base:
@@ -186,21 +187,23 @@ class MainLayout(Widget):
     num_of_base = 0
     focused_base = None
     bases = []
-    CENTIMETER_PER_PIXEL = 1  # how many centimeters a kivy pixel represents
+    CENTIMETER_PER_PIXEL = 1.5  # how many centimeters a kivy pixel represents
 
     draw_path_has_started = False
     draw_path_event = None
+
+    INTERVAL = 1
 
     tmp_pos = [120, 240]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.tagPos = [0, 0, 0]
-        self.tagBaseDist = [0, 0, 0, 0]
+        self.tagPos = [-1, -1, -1]
+        self.tagBaseDist = [-1, -1, -1, -1]
 
         self.start_backend()
-        Clock.schedule_interval(self.update_tag_base_dist, 0.5)
+        Clock.schedule_interval(lambda dt: self.update_tag_base_dist(), self.INTERVAL)
 
     def start_backend(self):
         lt = backend.lighTagAlgo()
@@ -209,16 +212,22 @@ class MainLayout(Widget):
         lt.setBaseBCoor(0, 8.535, 2.0)
         lt.setBaseCCoor(5.86, 8.535, 2.0)
         lt.setBaseDCoor(5.86, 0.0, 2.355)
-        Clock.schedule_interval(lt.run, 0.45)
+        Clock.schedule_interval(lambda dt: lt.run(), self.INTERVAL)
         self.lt = lt
 
-    def update_tag_base_dist(self, *args):
+    def update_tag_base_dist(self):
         """Update text of tag-base distances label on the window."""
-        # self.tagBaseDist = self.lt.getDistance()
-        # self.tagPos = self.lt.calculateTriPosition()
+        self.tagBaseDist = self.lt.getDistance()
+        tmp = self.lt.getCoor()
+        # self.tagPos = self.lt.getCoor()
+        for i in range(len(tmp)):
+            self.tagPos[i] = (
+                tmp[i] * 100 / self.CENTIMETER_PER_PIXEL
+            )  # m * cm/m / cm/px
         self.ids.tag_distance.text = "Tag distance (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}".format(
             *self.tagBaseDist
         )
+        print(self.tagPos)
 
     def _on_settings_pressed(self):
         """Not used yet."""
@@ -377,12 +386,12 @@ class MainLayout(Widget):
             self.draw_path_event.cancel()
             self.draw_path_has_started = False
             self.ids.start_plotting_path_btn.text = "START plotting path"
-            print("-- Draw path event has been cancelled")
+            # print("-- Draw path event has been cancelled")
         else:  # is NOT drawing path, will start drawing
             self.draw_path_event = Clock.schedule_interval(draw_path_callback, 1)
             self.draw_path_has_started = True
             self.ids.start_plotting_path_btn.text = "STOP plotting path"
-            print("-- Draw path event has started")
+            # print("-- Draw path event has started")
 
     def draw_a_circle(self, x, y, d=5):
         """
@@ -392,9 +401,10 @@ class MainLayout(Widget):
         y: y-coords of the circle on the canvas
         r: diameter of the circle
         """
+        print("Draw a circle at: [{}, {}]".format(x, y))
         with self.ids.canvas.canvas:
             Color(0.9, 0.1, 0.1, 0.9)
-            Ellipse(pos=(x, y + self.ids.canvas.height), size=(d, d))
+            Ellipse(pos=(x, y + self.ids.control_panel.height), size=(d, d))
 
 
 class UIApp(App):

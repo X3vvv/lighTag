@@ -391,32 +391,12 @@ class lighTagAlgo:
             out[2D list]: [[distance_AT, distance_BT, distance_CT, distance_DT],[coor_x, coor_y, coor_z]]
             or, -1 for error, need to be checked and skipped
         """
-        out = (
-            list()
-        )  # [[distance_AT, distance_BT, distance_CT, distance_DT],[coor_x, coor_y, coor_z]]
 
-        # 4. Get raw distance data from Wifi
         str = self.getWifiData()
-        # 4.  Or Get raw distance data from serial
-        # str = lt.getSerialData()
-
-        # for debug only
-        # print(str)
-
-        # 5. convert the raw data to real distance data via side-effect
         dis = self.convertDistance(str)
 
-        # for debug only
-        # print(dis)
-
-        # 6. Calculate the coordinates of the tag
         if dis != -1:  # check if the distance is valid
-            out.append(dis)  # add the distance to the output
             self.calculateQuartPosition()  # calculate the coordinates of the tag
-            out.append(self.coorArr)  # add the coordinates to the output
-            return out
-        else:
-            return -1
 
 
 def test():

@@ -7,3 +7,6 @@ lighTag project missions:
 3. python program to estimate label coordinates from distance information
 4. python program draws the motion path of the coordinates
 5. python program packaged to Android phone
+
+## UI
+Using kivy library.

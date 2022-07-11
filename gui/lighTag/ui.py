@@ -219,6 +219,7 @@ class MainLayout(Widget):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        Clock.schedule_interval(self.update_tag_base_dist, 0.5)
 
     def _on_settings_pressed(self):
         """Not used yet."""
@@ -354,9 +355,6 @@ class MainLayout(Widget):
     def debug(self):
         global tagBaseDist, tagPos
 
-        def draw_path_callback(duration_after_last_call):
-            self.draw_a_circle(tagPos[0], tagPos[1])
-
         # DEBUG: print base position of the window
         if len(self.bases) <= 0:
             print("No base yet.")
@@ -368,33 +366,35 @@ class MainLayout(Widget):
         print("Tag-base distances:\n\t {}\n\t {}\n\t {}\n\t {}".format(*tagBaseDist))
         print("Tag location: {}".format(tagPos))
 
-        # print a circle at the tag location
-        # print("Draw a circle at: ({}, {})...", tagPos[0], tagPos[1])
-        # self.draw_a_circle(tagPos[0], tagPos[1])
-        # print("Finish drawing!")
+    def on_plot_path_released(self):
+        global tagBaseDist, tagPos
 
-        # change tag-base distance labels
-        self.update_tag_base_dist()
+        def draw_path_callback(duration_after_last_call):
+            self.draw_a_circle(tagPos[0], tagPos[1])
 
-        if self.draw_path_has_started:
+        if self.draw_path_has_started:  # IS drawing path, will stop drawing
             if self.draw_path_event is None:
                 raise ValueError(
                     "draw_path_event is supposed to be a event but None value is detected."
                 )
             self.draw_path_event.cancel()
             self.draw_path_has_started = False
+            self.ids.start_plotting_path_btn.text = "START plotting path"
             print("-- Draw path event has been cancelled")
-        else:
+        else:  # is NOT drawing path, will start drawing
             self.draw_path_event = Clock.schedule_interval(draw_path_callback, 1)
             self.draw_path_has_started = True
+            self.ids.start_plotting_path_btn.text = "STOP plotting path"
             print("-- Draw path event has started")
 
-    def update_tag_base_dist(self):
+    def update_tag_base_dist(self, *args):
         """Update text of tag-base distances label on the window."""
         global tagBaseDist, tagPos
         self.ids.tag_distance.text = "Tag distance (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}".format(
             *tagBaseDist
         )
+
+        print(self.ids.tag_distance.text)
 
     def draw_a_circle(self, x, y, d=5):
         """

@@ -123,8 +123,12 @@
                 orientation: "vertical"
 
                 Button:
-                    id: "control panel right part placeholder"
-                    text: "not used"
-                    # size: root.width, root.height
+                    id: start_plotting_path_btn
+                    text: "START plotting path"
+                    on_release: root.on_plot_path_released()
+
+                Button:
+                    id: debug_btn
+                    text: "debug"
                     background_color: (0.2, 0.2, 0.2, 1)
                     on_release: root.debug()

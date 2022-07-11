@@ -208,14 +208,14 @@ class MainLayout(Widget):
         lt.setBaseACoor(0, 0, 2.0)
         lt.setBaseBCoor(0, 8.535, 2.0)
         lt.setBaseCCoor(5.86, 8.535, 2.0)
-        lt.setBaseDCoor(5.86, 0.0, 2.69)
+        lt.setBaseDCoor(5.86, 0.0, 2.355)
         Clock.schedule_interval(lt.run, 0.45)
         self.lt = lt
 
     def update_tag_base_dist(self, *args):
         """Update text of tag-base distances label on the window."""
-        self.tagBaseDist = self.lt.getDistance()
-        self.tagPos = self.lt.calculateTriPosition()
+        # self.tagBaseDist = self.lt.getDistance()
+        # self.tagPos = self.lt.calculateTriPosition()
         self.ids.tag_distance.text = "Tag distance (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}".format(
             *self.tagBaseDist
         )

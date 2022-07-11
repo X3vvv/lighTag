@@ -260,12 +260,16 @@ class lighTagAlgo:
         )
         rst2 = sympy.solve(f2, z2)
 
-        min1 = abs(list(rst1)[0] - list(rst2)[0])
-        min2 = abs(list(rst1)[0] - list(rst2)[1])
-        min3 = abs(list(rst1)[1] - list(rst2)[0])
-        min4 = abs(list(rst1)[1] - list(rst2)[1])
+        if complex(list(rst1)[0]).real > complex(list(rst1)[1]).real:
+            list(rst1)[0], list(rst1)[1] = list(rst1)[1], list(rst1)[0]
 
-        min0 = min(min1, min2, min3, min4)
+        if complex(list(rst2)[0]).real > complex(list(rst2)[1]).real:
+            list(rst2)[0], list(rst2)[1] = list(rst2)[1], list(rst2)[0]
+
+        min1 = abs(list(rst1)[0] - list(rst2)[0])
+        min2 = abs(list(rst1)[1] - list(rst2)[1])
+
+        min0 = min(min1, min2)
 
         out = 0
 
@@ -273,10 +277,6 @@ class lighTagAlgo:
             out = (list(rst1)[0] + list(rst2)[0]) / 2
         elif min0 == min2:
             out = (list(rst1)[0] + list(rst2)[1]) / 2
-        elif min0 == min3:
-            out = (list(rst1)[1] + list(rst2)[0]) / 2
-        elif min0 == min4:
-            out = (list(rst1)[1] + list(rst2)[1]) / 2
 
         out = complex(out).real
 
@@ -439,7 +439,7 @@ def test():
     lt.setBaseACoor(0, 0, 2.0)
     lt.setBaseBCoor(0, 8.535, 2.0)
     lt.setBaseCCoor(5.86, 8.535, 2.0)
-    lt.setBaseDCoor(5.86, 0.0, 2.69)
+    lt.setBaseDCoor(5.86, 0.0, 2.355)
 
     # for debug only
     # arr = [4.04,6.05,6.78,5.4]

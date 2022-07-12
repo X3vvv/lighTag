@@ -283,7 +283,7 @@ class lighTagAlgo:
         if min0 == min1:
             out = (list(rst1)[0] + list(rst2)[0]) / 2
         elif min0 == min2:
-            out = (list(rst1)[0] + list(rst2)[1]) / 2
+            out = (list(rst1)[1] + list(rst2)[1]) / 2
 
         out = complex(out).real
 

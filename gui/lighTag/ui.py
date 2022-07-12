@@ -202,6 +202,8 @@ class MainLayout(Widget):
     }
     path_dot_color = None  # color of the dot used to draw the path
 
+    PATH_DOT_DIAMETER_IN_PIXEL = 10
+
     INTERVAL = 1
 
     tmp_pos = [120, 240]
@@ -455,11 +457,13 @@ class MainLayout(Widget):
         r: diameter of the circle
         """
         # print("Draw a circle at: [{}, {}]".format(x, y))
-        D = 5
         color = self.path_dot_color or (0.9, 0.1, 0.1, 0.9)
         with self.ids.canvas.canvas:
             Color(*color)
-            Ellipse(pos=(x, y + self.ids.control_panel.height), size=(D, D))
+            Ellipse(
+                pos=(x, y + self.ids.control_panel.height),
+                size=(self.PATH_DOT_DIAMETER_IN_PIXEL, self.PATH_DOT_DIAMETER_IN_PIXEL),
+            )
 
     def get_tag_pixel_pos(self):
         """Get tag position in pixel (unit: meter -> pixel)."""

@@ -12,7 +12,7 @@ Using kivy library.
 - [ ] :exclamation: imporove math function speed
 - [ ] :exclamation: draw base position according to the beckend.py file's settings
 - [ ] :exclamation: canvas range represent + x-y revert
-- [ ] :exclamation: red dot -> larger
+- [X] :exclamation: red dot -> larger
 - [ ] old dot fade out
 - [ ] (optional) increase refresh rate
 - [ ] (optional) add background (change along with floor level)

@@ -194,6 +194,14 @@ class MainLayout(Widget):
     draw_path_has_started = False
     draw_path_event = None
 
+    FIRST_FLOOR_CELLING_HEIGHT = 1.5
+    FLOOR_COLORS = {
+        "default": (0.9, 0.1, 0.1, 0.9),
+        "1": (101 / 255, 9 / 255, 179 / 255, 1),
+        "2": (0 / 255, 166 / 255, 66 / 255, 1),
+    }
+    path_dot_color = None  # color of the dot used to draw the path
+
     INTERVAL = 1
 
     tmp_pos = [120, 240]
@@ -205,7 +213,7 @@ class MainLayout(Widget):
         self.tagBaseDist = [-1, -1, -1, -1]
 
         self.start_backend()
-        Clock.schedule_interval(lambda dt: self.update_tag_base_dist(), self.INTERVAL)
+        Clock.schedule_interval(lambda dt: self.update_tag_data(), self.INTERVAL)
 
     def start_backend(self):
         if DEBUG_UI:
@@ -238,7 +246,7 @@ class MainLayout(Widget):
             self.lt = lt
         print("Starting backend")
 
-    def update_tag_base_dist(self):
+    def update_tag_data(self):
         """Update text of tag-base distances label on the window."""
         if DEBUG_UI:
             self.tagBaseDist = self.tagBaseDist
@@ -247,14 +255,36 @@ class MainLayout(Widget):
             self.tagBaseDist = self.lt.getDistance()
             self.tagPos = self.lt.getCoor()
 
-        self.ids.tag_distance.text = "Tag distance (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}".format(
-            *self.tagBaseDist
+        # edge fix
+        for i in range(len(self.tagPos)):
+            if self.tagPos[i] < 0:
+                self.tagPos[i] = 0
+
+        # update tag_distance label
+        self.ids.tag_distance.text = "Tag info (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}\n\n(x:{:.1f}, y:{:.1f}, h:{:.1f})".format(
+            *self.tagBaseDist, *self.tagPos
         )
 
+        # update floor label
+        floor = "1" if self.tagPos[2] < self.FIRST_FLOOR_CELLING_HEIGHT else "2"
+        self.ids.floor_label.text = f"Floor: {floor} L"
+
+        # update colors of floor label & path dots
+        self.path_dot_color = self._get_floor_color(floor)
+        self.ids.floor_label.color = self._get_floor_color(floor)
+
+        # DEBUG: print tag information
         print(
             "Tag: x={:.1f}m, y={:.1f}m, h={:.1f}m [({:.1f}, {:.1f}) pixel]".format(
                 *self.tagPos, *self.get_tag_pixel_pos()[:2]
             )
+        )
+
+    def _get_floor_color(self, floor: str):
+        return (
+            self.FLOOR_COLORS[floor]
+            if floor in self.FLOOR_COLORS.keys()
+            else self.FLOOR_COLORS["default"]
         )
 
     def _on_settings_pressed(self):
@@ -416,7 +446,7 @@ class MainLayout(Widget):
             self.ids.start_plotting_path_btn.text = "STOP plotting path"
             # print("-- Draw path event has started")
 
-    def draw_a_circle(self, x, y, d=5):
+    def draw_a_circle(self, x, y):
         """
         Plot a circle on the canvas.
         #Param
@@ -425,9 +455,11 @@ class MainLayout(Widget):
         r: diameter of the circle
         """
         # print("Draw a circle at: [{}, {}]".format(x, y))
+        D = 5
+        color = self.path_dot_color or (0.9, 0.1, 0.1, 0.9)
         with self.ids.canvas.canvas:
-            Color(0.9, 0.1, 0.1, 0.9)
-            Ellipse(pos=(x, y + self.ids.control_panel.height), size=(d, d))
+            Color(*color)
+            Ellipse(pos=(x, y + self.ids.control_panel.height), size=(D, D))
 
     def get_tag_pixel_pos(self):
         """Get tag position in pixel (unit: meter -> pixel)."""

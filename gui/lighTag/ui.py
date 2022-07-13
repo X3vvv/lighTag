@@ -97,16 +97,19 @@ class MainLayout(Widget):
     def update_tag_data(self):
         """Update text of tag-base distances label on the window."""
         if DEBUG_UI:
+            # haven't connected to backend, simulate tag's data
             self.tagBaseDist = self.tagBaseDist
             self.tagPos = self.tagPos
         else:
+            # get data from backend
             self.tagBaseDist = self.lt.getDistance()
             self.tagPos = self.lt.getCoor()
 
+        # reverse X-Y axis if needed
         if self.REVERSE_XY:
             self.tagPos[0], self.tagPos[1] = self.tagPos[1], self.tagPos[0]
 
-        # edge fix
+        # fix cross borders problem
         for i in range(len(self.tagPos)):
             if self.tagPos[i] < 0:
                 self.tagPos[i] = 0
@@ -124,20 +127,12 @@ class MainLayout(Widget):
         self.path_dot_color = self._get_floor_color(floor)
         self.ids.floor_label.color = self._get_floor_color(floor)
 
-        # # DEBUG: print tag information
-        # print(
-        #     "Tag: x={:.1f}m, y={:.1f}m, h={:.1f}m [({:.1f}, {:.1f}) pixel]".format(
-        #         *self.tagPos, *self.get_tag_pixel_pos()[:2]
-        #     )
-        # )
-        pass
-
     def _get_floor_color(self, floor: str):
-        return (
-            self.FLOOR_COLORS[floor]
-            if floor in self.FLOOR_COLORS.keys()
-            else self.FLOOR_COLORS["default"]
-        )
+        """Get the floor color according to the floor layer."""
+        if floor in self.FLOOR_COLORS.keys():
+            return self.FLOOR_COLORS[floor]
+        else:
+            return self.FLOOR_COLORS["default"]
 
     def _on_settings_pressed(self):
         """Not used yet."""
@@ -191,24 +186,36 @@ class MainLayout(Widget):
         self.ids.canvas.canvas.remove(inst)
 
     def create_edge(self, start_corner_idx, end_corner_idx, edge_type: str = "normal"):
-        start_corner, end_corner = (
-            self.ioa_corners[start_corner_idx],
-            self.ioa_corners[end_corner_idx],
-        )
-        new_edge_name = "{}-{}".format(start_corner.text, end_corner.text)
-        new_edge = Line(
-            points=[*start_corner.pos, *end_corner.pos],
-            width=2,
-            joint="round",
-            color=(1, 0, 0, 1),
-        )
-        self.ids.canvas.canvas.add(new_edge)
+        """
+        Create a edge between the corners of AOI (Area of Interests).
+        #Params
+        start_corner_idx: index (for 'ioa_corners' array) of the AOI cornor where the edge starts from.
+        end_corner_idx: index (for 'ioa_corners' array) of the AOI cornor where the edge ends to.
+        edge_type: type of this edge, whether a edge created automatically to close the AOI.
+        """
         if edge_type != "normal" and edge_type != "closing line":
             raise ValueError("Edge type can only be 'normal' or 'closing line'.")
+        start_corner = self.ioa_corners[start_corner_idx]
+        end_corner = self.ioa_corners[end_corner_idx]
+        new_edge_name = "{}-{}".format(start_corner.text, end_corner.text)
+        new_edge = self._draw_a_line(start_corner.pos, end_corner.pos)
         self.ioa_edges[edge_type][new_edge_name] = new_edge
         return new_edge
 
+    def _draw_a_line(self, start_pos, end_pos):
+        color = Color(1, 0, 0, 0.7)
+        line = Line(
+            points=[*start_pos, *end_pos],
+            width=2,
+            joint="round",
+        )
+        self.ids.canvas.canvas.add(color)
+        self.ids.canvas.canvas.add(line)
+
+        return line
+
     def update_edges(self, btn_id):
+        """Update all the edges of the AOI (area of interests). Called when path dots' position are changed."""
         for edge_type in self.ioa_edges.keys():
             for edge_name in self.ioa_edges[edge_type].keys():
                 curr_edge = self.ioa_edges[edge_type][edge_name]
@@ -218,6 +225,7 @@ class MainLayout(Widget):
                     curr_edge.points[0:2],
                     curr_edge.points[2:4],
                 )
+                # update the new position of corners
                 if start_corner_id == str(btn_id):
                     start_corner_points = curr_corner.pos
                 elif end_corner_id == str(btn_id):
@@ -225,6 +233,7 @@ class MainLayout(Widget):
                 else:
                     continue
 
+                # update the edge's position
                 curr_edge.points = [*start_corner_points, *end_corner_points]
 
     def _on_base_released(self, base_btn):
@@ -333,6 +342,7 @@ class MainLayout(Widget):
         self.ids.canvas.add_widget(popup)
 
     def debug(self):
+        """Print some debug info."""
         # print global positions of all the bases
         print("========= DEBUG messages =========")
         print("Base details:")
@@ -352,11 +362,21 @@ class MainLayout(Widget):
         print()
 
     def on_plot_path_released(self):
-        def draw_path_callback(duration_after_last_call):
-            self.draw_a_circle(*self.get_tag_pixel_pos()[:2])
-            self.update_path_dots_transparency()
+        """Callback function of 'plot path' button."""
 
-        if self.draw_path_has_started:  # IS drawing path, will stop drawing
+        def draw_path_callback():
+            # draw a circle on the canvas
+            new_path_dot_color, new_path_dot = self._draw_a_circle(
+                *self.get_tag_pixel_pos()[:2],
+                self.PATH_DOT_DIAMETER_IN_PIXEL,
+                self.path_dot_color,
+            )
+            # add circle to alive path dot list
+            self.alive_path_dot_list.append((new_path_dot_color, new_path_dot))
+            self.update_old_path_dots()
+
+        # IS drawing path, will stop drawing
+        if self.draw_path_has_started:
             if self.draw_path_event is None:
                 raise ValueError(
                     "draw_path_event is supposed to be a event but None value is detected."
@@ -365,45 +385,47 @@ class MainLayout(Widget):
             self.draw_path_has_started = False
             # print("-- Draw path event has been cancelled")
             self.ids.start_plotting_path_btn.text = "START plotting path"
-        else:  # is NOT drawing path, will start drawing
-            self.draw_path_event = Clock.schedule_interval(draw_path_callback, 1)
+        # is NOT drawing path, will start drawing
+        else:
+            self.draw_path_event = Clock.schedule_interval(
+                lambda dt: draw_path_callback, 1
+            )
             self.draw_path_has_started = True
             # print("-- Draw path event has started")
             self.ids.start_plotting_path_btn.text = "STOP plotting path"
 
-    def draw_a_circle(self, x, y):
+    def _draw_a_circle(self, x, y, d, color=(1, 1, 1, 1)):
         """
         Plot a circle on the canvas.
         #Param
         x: x-coords of the circle on the canvas
         y: y-coords of the circle on the canvas
-        r: diameter of the circle
+        d: diameter of the circle
+        color: color of the circle
+        #Return
+        Color of the circle and the circle instance.
         """
-        # print("Draw a circle at: [{}, {}]".format(x, y))
-        color = self.path_dot_color or (0.9, 0.1, 0.1, 0.9)
-
         # canvas add new color and circle
-        new_path_dot_color = Color(*color)
-        new_path_dot = Ellipse(
+        circle_color = Color(*color)
+        circle_instance = Ellipse(
             pos=(x, y + self.ids.control_panel.height),
-            size=(self.PATH_DOT_DIAMETER_IN_PIXEL, self.PATH_DOT_DIAMETER_IN_PIXEL),
+            size=(d, d),
         )
-        self.ids.canvas.canvas.add(new_path_dot_color)
-        self.ids.canvas.canvas.add(new_path_dot)
-
-        # add circle to alive path dot list
-        self.alive_path_dot_list.append((new_path_dot_color, new_path_dot))
+        self.ids.canvas.canvas.add(circle_color)
+        self.ids.canvas.canvas.add(circle_instance)
 
         # # draw a circle onto the canvas
         # with self.ids.canvas.canvas:
         #     Color(*color)
         #     Ellipse(
         #         pos=(x, y + self.ids.control_panel.height),
-        #         size=(self.PATH_DOT_DIAMETER_IN_PIXEL, self.PATH_DOT_DIAMETER_IN_PIXEL),
+        #         size=(d, d),
         #     )
-        pass
 
-    def update_path_dots_transparency(self):
+        return circle_color, circle_instance
+
+    def update_old_path_dots(self):
+        """Update exists path dots: decrease the opacity of all dots and remove dots with opacity of 0 from alive_path_dot_list."""
         to_be_deleted_dot_idx_list = []
         for i in range(len(self.alive_path_dot_list)):
             curr_circle_color = self.alive_path_dot_list[i][0]
@@ -412,18 +434,17 @@ class MainLayout(Widget):
             else:
                 curr_circle_color.a -= 1 / self.PATH_DOT_LIFETIME
 
-        while len(to_be_deleted_dot_idx_list) > 0:
-            del self.alive_path_dot_list[to_be_deleted_dot_idx_list.pop()]
-
-        # print("len(self.alive_path_dot_list):\n\t", len(self.alive_path_dot_list))
-        pass
+        for dot_idx in to_be_deleted_dot_idx_list:
+            del self.alive_path_dot_list[dot_idx]
 
     def get_tag_pixel_pos(self):
         """Get tag position in pixel (unit: meter -> pixel)."""
-        tmp = self.tagPos.copy()
-        for i in range(len(tmp)):
-            tmp[i] = tmp[i] * 100 / self.CENTIMETER_PER_PIXEL  # m * cm/m / cm/px
-        return tmp
+        pixel_pos = self.tagPos.copy()
+        for i in range(len(pixel_pos)):
+            pixel_pos[i] = (
+                pixel_pos[i] * 100 / self.CENTIMETER_PER_PIXEL
+            )  # m * cm/m / cm/px
+        return pixel_pos
 
 
 class UIApp(App):

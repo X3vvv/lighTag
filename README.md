@@ -11,9 +11,9 @@ Using kivy library.
 - [ ] :bangbang: change base function into target area function, used to detect whether label has entered the area (use area color + voice to indicate whether has entered or not)
 - [x] :exclamation: (try to :D ) improve math function speed
 - [ ] :exclamation: draw base position according to the backend.py file's settings
-- [ ] :exclamation: canvas range represent + x-y revert
-- [X] :exclamation: red dot -> larger
-- [ ] old dot fade out
+- [x] :exclamation: canvas range represent + x-y revert
+- [x] :exclamation: red dot -> larger
+- [x] old dot fade out
 - [ ] (optional) increase refresh rate
 - [ ] (optional) add background (change along with floor level)
 - [ ] ~~(abandoned) scale change according to base coords~~

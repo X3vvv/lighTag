@@ -22,171 +22,12 @@ import backend
 DEBUG_UI = True  # if True, won't connect backend, run simulation data instead
 
 
-class Base:
-    SIDE_LEN = 17  # side length of the squred base button
-    FONT_SIZE = 13  # font size of the text on the button
-    CANVAS_ORIGIN_OFFSET = (0, 250)  # canvas origin's position relative to the window
-
-    # no class variable is defined
-
-    def __init__(self, id, father_widget):
-        """
-        Instance variables (values differs in different instances):
-            self.id: base id
-            self.widget: kivy button widget
-            self.father_widget: kivy father widget of the base button
-            self.x = y = z: position of the base button on the canvas
-        """
-        self.id = id
-
-        # init base position on the canvas
-        self.x = 0
-        self.y = 0
-        self.z = 0
-
-        # create the button
-        self.widget = self.create_button()
-        # father widget
-        self.father_widget = father_widget
-
-    def update_pos(self, x, y, z=None):
-        """Update button position fields values and window position."""
-        # update fields
-        self.x = x
-        self.y = y
-        if z is not None:
-            self.z = z
-
-        # update widget on window
-        self.widget.pos = (x, y)
-
-    def get_pos_on_window(self):
-        """Return the position of the base button on the whole 2D window."""
-        return (
-            self.x + self.CANVAS_ORIGIN_OFFSET[0],
-            self.y + self.CANVAS_ORIGIN_OFFSET[1],
-        )
-
-    def create_button(self):
-        btn = Button(
-            text=str(self.id),
-            font_size=self.FONT_SIZE,
-            size_hint=(None, None),
-            size=(self.SIDE_LEN, self.SIDE_LEN),
-            pos=self.get_pos_on_window(),
-            on_release=self._on_button_released,
-        )
-        self.id += 1
-        return btn
-
-    def _on_button_released(self):
-        """Callback function for when the base button is released. A popup window will be created."""
-
-        def create_popup_window(self):
-            """Create a popup window for the base button."""
-
-            def popup_confirm(confirm_btn):
-                """Callback function of confirm button in the base popup window. If the input isn't number, set to 0 by default."""
-                x = y = z = 0
-                if base_x.text.isdigit():
-                    x = float(base_x.text)
-                if base_y.text.isdigit():
-                    y = float(base_y.text)
-                if base_z.text.isdigit():
-                    z = float(base_z.text)
-                if x < 0:
-                    x = 0
-                elif x > self.ids.canvas_temp_label.size[0] - 17:
-                    x = self.ids.canvas_temp_label.size[0] - 17
-                if y < 0:
-                    y = 0
-                elif y > self.ids.canvas_temp_label.size[1] - 17:
-                    y = self.ids.canvas_temp_label.size[1] - 17
-                self.widget.pos = [x, y + self.father_widget.ids.control_panel.height]
-                self.father_widget.ids.canvas.remove_widget(popup)
-
-            def delete_base(delete_btn):
-                """Callback function of delete button in the base popup window."""
-                # def confirm_delete_base(confirm_delete_btn):
-                #     self.ids.canvas.remove_widget(doubleCheckPopup)
-
-                # def cancel_delete_base(cancel_delete_btn):
-                #     self.ids.canvas.remove_widget(doubleCheckPopup)
-
-                # doubleCheckLayout = BoxLayout(orientation="vertical")
-                # doubleCheckLayout.add_widget(
-                #     Label(text="Are you sure to delete this base?", font_size=20)
-                # )
-                # doubleCheckLayout.add_widget(
-                #     Button(text="Yes", size_hint=(1, 0.4), on_release=confirm_delete_base)
-                # )
-                # doubleCheckLayout.add_widget(
-                #     Button(text="Cancel", size_hint=(1, 0.4), on_release=cancel_delete_base)
-                # )
-                # doubleCheckPopup = Popup(
-                #     title="Settings",
-                #     content=doubleCheckLayout,
-                #     size_hint=(None, None),
-                #     size=(200, 150),
-                #     pos_hint={
-                #         "center_x": 0.5,
-                #         "center_y": 0.500,
-                #     },
-                # )
-                # self.ids.canvas.add_widget(doubleCheckPopup)
-                pass
-
-            # main layout of the popup window
-            mainLayout = BoxLayout(orientation="vertical")
-
-            # layout which holds all the position information
-            posLayout = GridLayout(cols=2)
-
-            base_x = TextInput(multiline=False, text="0", font_size=10)
-            base_y = TextInput(multiline=False, text="0", font_size=10)
-            base_z = TextInput(multiline=False, text="0", font_size=10)
-
-            posLayout.add_widget(Label(text="x:"))
-            posLayout.add_widget(base_x)
-            posLayout.add_widget(Label(text="y:"))
-            posLayout.add_widget(base_y)
-            posLayout.add_widget(Label(text="z:"))
-            posLayout.add_widget(base_z)
-
-            mainLayout.add_widget(posLayout)
-
-            # add confirm button
-            mainLayout.add_widget(
-                Button(text="Confirm", size_hint=(1, 0.45), on_release=popup_confirm)
-            )
-
-            # add delete button
-            mainLayout.add_widget(
-                Button(
-                    text="Delete",
-                    size_hint=(1, 0.45),
-                    color=(1, 30 / 255, 30 / 255, 1),
-                    on_release=delete_base,
-                    disabled=True,
-                )
-            )
-
-            # add main layout to the popup window
-            return Popup(
-                title="Settings",
-                content=mainLayout,
-                size_hint=(None, None),
-                size=(250, 200),
-                pos_hint={"center_x": 0.5, "center_y": 0.5},  # center of father widget
-            )
-
-        popup = create_popup_window()
-        self.ids.canvas.add_widget(popup)
-
-
 class MainLayout(Widget):
     ioa_corners = []
-    ioa_edges = {}  # {edge_name: edge_object} e.g., {1-2: <edge object xxxx>}
+    ioa_edges = {
+        "normal": {},
+        "closing line": {},
+    }  # {edge_name: edge_object} e.g., {1-2: <edge object xxxx>}
     CENTIMETER_PER_PIXEL = 1.5  # how many centimeters a kivy pixel represents
 
     draw_path_has_started = False
@@ -326,36 +167,65 @@ class MainLayout(Widget):
 
         # connect the 2 most recent added corners
         if len(self.ioa_corners) >= 2:
-            start_corner = self.ioa_corners[-1]
-            end_corner = self.ioa_corners[-2]
-            new_edge_name = "{}-{}".format(start_corner.text, end_corner.text)
-            new_edge = Line(
-                points=[*start_corner.pos, *end_corner.pos],
-                width=2,
-                joint="round",
-                color=(1, 0, 0, 1),
+            self.create_edge(-1, -2)
+
+        # connect the last corner with the first corner
+        if len(self.ioa_corners) >= 3:
+            assert (
+                len(self.ioa_edges["closing line"]) <= 1
+                and len(self.ioa_edges["closing line"]) >= 0
             )
-            self.ids.canvas.canvas.add(new_edge)
-            self.ioa_edges[new_edge_name] = new_edge
+
+            # remove last closing line
+            if len(self.ioa_edges["closing line"]) == 1:
+                old_closing_line = list(self.ioa_edges["closing line"].values())[0]
+                self.remove_instance_from_canvas(old_closing_line)
+                self.ioa_edges["closing line"].clear()
+
+            # create a new closing line
+            self.create_edge(0, -1, "closing line")
+
         print(self.ioa_edges)
 
-    def update_edges(self, btn_id):
-        for edge_name in self.ioa_edges.keys():
-            curr_edge = self.ioa_edges[edge_name]
-            curr_corner = self.ioa_corners[int(btn_id) - 1]
-            start_corner_id, end_corner_id = edge_name.split("-")
-            start_corner_points, end_corner_points = (
-                curr_edge.points[0:2],
-                curr_edge.points[2:4],
-            )
-            if start_corner_id == str(btn_id):
-                start_corner_points = curr_corner.pos
-            elif end_corner_id == str(btn_id):
-                end_corner_points = curr_corner.pos
-            else:
-                continue
+    def remove_instance_from_canvas(self, inst):
+        self.ids.canvas.canvas.remove(inst)
 
-            curr_edge.points = [*start_corner_points, *end_corner_points]
+    def create_edge(self, start_corner_idx, end_corner_idx, edge_type: str = "normal"):
+        start_corner, end_corner = (
+            self.ioa_corners[start_corner_idx],
+            self.ioa_corners[end_corner_idx],
+        )
+        new_edge_name = "{}-{}".format(start_corner.text, end_corner.text)
+        new_edge = Line(
+            points=[*start_corner.pos, *end_corner.pos],
+            width=2,
+            joint="round",
+            color=(1, 0, 0, 1),
+        )
+        self.ids.canvas.canvas.add(new_edge)
+        if edge_type != "normal" and edge_type != "closing line":
+            raise ValueError("Edge type can only be 'normal' or 'closing line'.")
+        self.ioa_edges[edge_type][new_edge_name] = new_edge
+        return new_edge
+
+    def update_edges(self, btn_id):
+        for edge_type in self.ioa_edges.keys():
+            for edge_name in self.ioa_edges[edge_type].keys():
+                curr_edge = self.ioa_edges[edge_type][edge_name]
+                curr_corner = self.ioa_corners[int(btn_id) - 1]
+                start_corner_id, end_corner_id = edge_name.split("-")
+                start_corner_points, end_corner_points = (
+                    curr_edge.points[0:2],
+                    curr_edge.points[2:4],
+                )
+                if start_corner_id == str(btn_id):
+                    start_corner_points = curr_corner.pos
+                elif end_corner_id == str(btn_id):
+                    end_corner_points = curr_corner.pos
+                else:
+                    continue
+
+                curr_edge.points = [*start_corner_points, *end_corner_points]
 
     def _on_base_released(self, base_btn):
         """Callback function for when the base button is released. A popup window will be created."""

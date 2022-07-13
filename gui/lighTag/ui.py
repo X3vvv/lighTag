@@ -143,11 +143,11 @@ class MainLayout(Widget):
         """Not used yet."""
         self.ids.settings_img.source = "imgs/settings-outline.png"
 
-    def add_base(self):
+    def add_AOI_corner(self):
         """Callback function for adding a base button to the canvas."""
-        base_id = len(self.ioa_corners) + 1
+        corner_id = len(self.ioa_corners) + 1
         new_corner = Button(
-            text=str(base_id),
+            text=str(corner_id),
             font_size=13,
             size_hint=(None, None),
             size=(17, 17),
@@ -214,27 +214,50 @@ class MainLayout(Widget):
 
         return line
 
-    def update_edges(self, btn_id):
+    def update_edges(self, corner_id):
         """Update all the edges of the AOI (area of interests). Called when path dots' position are changed."""
         for edge_type in self.ioa_edges.keys():
             for edge_name in self.ioa_edges[edge_type].keys():
                 curr_edge = self.ioa_edges[edge_type][edge_name]
-                curr_corner = self.ioa_corners[int(btn_id) - 1]
-                start_corner_id, end_corner_id = edge_name.split("-")
+                curr_corner = self.ioa_corners[int(corner_id) - 1]
+                start_corner_id, end_corner_id = self._get_corners_by_edge_name(
+                    edge_name
+                )
                 start_corner_points, end_corner_points = (
                     curr_edge.points[0:2],
                     curr_edge.points[2:4],
                 )
                 # update the new position of corners
-                if start_corner_id == str(btn_id):
+                if start_corner_id == str(corner_id):
                     start_corner_points = curr_corner.pos
-                elif end_corner_id == str(btn_id):
+                elif end_corner_id == str(corner_id):
                     end_corner_points = curr_corner.pos
+                # no update needed, skip the current loop
                 else:
                     continue
 
                 # update the edge's position
                 curr_edge.points = [*start_corner_points, *end_corner_points]
+
+    def _get_corners_by_edge_name(self, edge_name):
+        """Returns if the id of the corners where the edge starts and ends. e.g., ((200, 10), (330, 220))"""
+        start_corner_id, end_corner_id = edge_name.split("-")
+        return start_corner_id, end_corner_id
+
+    def is_in_the_area(
+        self, target_pos, ul_corner_pos, ur_corner_pos, ll_corner_pos, lr_corner_pos
+    ):
+        """
+        Return True if the target position is inside the area consist of four corners (upper-left, upper-right, lower-left, lower-right).
+
+        #Params
+        target_pos: (x, y) position of the target dot.
+        ul_corner_pos: (x, y) position of the upper-left corner of the area.
+        ur_corner_pos: (x, y) position of the upper-right corner of the area.
+        ll_corner_pos: (x, y) position of the lower-left corner of the area.
+        lr_corner_pos: (x, y) position of the lower-left corner of the area.
+        """
+        pass
 
     def _on_base_released(self, base_btn):
         """Callback function for when the base button is released. A popup window will be created."""

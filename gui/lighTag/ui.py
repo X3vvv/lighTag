@@ -203,12 +203,11 @@ class MainLayout(Widget):
     path_dot_color = None  # color of the dot used to draw the path
 
     PATH_DOT_DIAMETER_IN_PIXEL = 10
-
     REVERSE_XY = True  # reverse x-y axis
-
     CLOCK_SCHEDULE_INTERVAL = 1  # interval of the callbacks added to the clock
 
-    tmp_pos = [120, 240]
+    alive_path_dot_list = []  # stores a list of (color, circle) tuples
+    PATH_DOT_LIFETIME = 8  # (unit: update time) each path dot's life time, old dots will gradually fade out and be removed from the alive_path_dot_list lise
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -430,17 +429,26 @@ class MainLayout(Widget):
         self.ids.canvas.add_widget(popup)
 
     def debug(self):
-        # DEBUG: print base position (of the window)
+        # print global positions of all the bases
+        print("========= DEBUG messages =========")
         print("Base details:")
         if len(self.bases) <= 0:
             print("\tNo base yet.")
         else:
             for i in range(len(self.bases)):
                 print("\t[base {}] pos on window: {}]".format(i, self.bases[i].pos))
+        print()
+
+        # print all drawed circles
+        print("Canvas instructions details:")
+        for color, circle in self.alive_path_dot_list:
+            print("\t{}\n\t{}\n".format(color, circle))
+        print()
 
     def on_plot_path_released(self):
         def draw_path_callback(duration_after_last_call):
             self.draw_a_circle(*self.get_tag_pixel_pos()[:2])
+            self.update_path_dots_transparency()
 
         if self.draw_path_has_started:  # IS drawing path, will stop drawing
             if self.draw_path_event is None:
@@ -449,13 +457,13 @@ class MainLayout(Widget):
                 )
             self.draw_path_event.cancel()
             self.draw_path_has_started = False
-            self.ids.start_plotting_path_btn.text = "START plotting path"
             # print("-- Draw path event has been cancelled")
+            self.ids.start_plotting_path_btn.text = "START plotting path"
         else:  # is NOT drawing path, will start drawing
             self.draw_path_event = Clock.schedule_interval(draw_path_callback, 1)
             self.draw_path_has_started = True
-            self.ids.start_plotting_path_btn.text = "STOP plotting path"
             # print("-- Draw path event has started")
+            self.ids.start_plotting_path_btn.text = "STOP plotting path"
 
     def draw_a_circle(self, x, y):
         """
@@ -467,12 +475,42 @@ class MainLayout(Widget):
         """
         # print("Draw a circle at: [{}, {}]".format(x, y))
         color = self.path_dot_color or (0.9, 0.1, 0.1, 0.9)
-        with self.ids.canvas.canvas:
-            Color(*color)
-            Ellipse(
-                pos=(x, y + self.ids.control_panel.height),
-                size=(self.PATH_DOT_DIAMETER_IN_PIXEL, self.PATH_DOT_DIAMETER_IN_PIXEL),
-            )
+
+        # canvas add new color and circle
+        new_path_dot_color = Color(*color)
+        new_path_dot = Ellipse(
+            pos=(x, y + self.ids.control_panel.height),
+            size=(self.PATH_DOT_DIAMETER_IN_PIXEL, self.PATH_DOT_DIAMETER_IN_PIXEL),
+        )
+        self.ids.canvas.canvas.add(new_path_dot_color)
+        self.ids.canvas.canvas.add(new_path_dot)
+
+        # add circle to alive path dot list
+        self.alive_path_dot_list.append((new_path_dot_color, new_path_dot))
+
+        # # draw a circle onto the canvas
+        # with self.ids.canvas.canvas:
+        #     Color(*color)
+        #     Ellipse(
+        #         pos=(x, y + self.ids.control_panel.height),
+        #         size=(self.PATH_DOT_DIAMETER_IN_PIXEL, self.PATH_DOT_DIAMETER_IN_PIXEL),
+        #     )
+        pass
+
+    def update_path_dots_transparency(self):
+        to_be_deleted_dot_idx_list = []
+        for i in range(len(self.alive_path_dot_list)):
+            curr_circle_color = self.alive_path_dot_list[i][0]
+            if curr_circle_color.a <= 0:
+                to_be_deleted_dot_idx_list.append(i)
+            else:
+                curr_circle_color.a -= 1 / self.PATH_DOT_LIFETIME
+
+        while len(to_be_deleted_dot_idx_list) > 0:
+            del self.alive_path_dot_list[to_be_deleted_dot_idx_list.pop()]
+
+        # print("to_be_deleted_dot_idx_list:\n\t", to_be_deleted_dot_idx_list)
+        # print("len(self.alive_path_dot_list):\n\t", len(self.alive_path_dot_list))
 
     def get_tag_pixel_pos(self):
         """Get tag position in pixel (unit: meter -> pixel)."""

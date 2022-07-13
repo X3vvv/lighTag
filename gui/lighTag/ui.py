@@ -204,7 +204,9 @@ class MainLayout(Widget):
 
     PATH_DOT_DIAMETER_IN_PIXEL = 10
 
-    INTERVAL = 1
+    REVERSE_XY = True  # reverse x-y axis
+
+    CLOCK_SCHEDULE_INTERVAL = 1  # interval of the callbacks added to the clock
 
     tmp_pos = [120, 240]
 
@@ -215,7 +217,9 @@ class MainLayout(Widget):
         self.tagBaseDist = [-1, -1, -1, -1]
 
         self.start_backend()
-        Clock.schedule_interval(lambda dt: self.update_tag_data(), self.INTERVAL)
+        Clock.schedule_interval(
+            lambda dt: self.update_tag_data(), self.CLOCK_SCHEDULE_INTERVAL
+        )
 
     def start_backend(self):
         if DEBUG_UI:
@@ -235,7 +239,9 @@ class MainLayout(Widget):
                 for i in range(len(self.tagBaseDist)):
                     self.tagBaseDist[i] += random() * dist_delta - dist_delta / 2
 
-            Clock.schedule_interval(lambda dt: gen_simulate_data(), self.INTERVAL)
+            Clock.schedule_interval(
+                lambda dt: gen_simulate_data(), self.CLOCK_SCHEDULE_INTERVAL
+            )
 
         else:
             lt = backend.lighTagAlgo()
@@ -244,7 +250,7 @@ class MainLayout(Widget):
             lt.setBaseBCoor(0, 8.535, 2.0)
             lt.setBaseCCoor(5.86, 8.535, 2.0)
             lt.setBaseDCoor(5.86, 0.0, 2.355)
-            Clock.schedule_interval(lambda dt: lt.run(), self.INTERVAL)
+            Clock.schedule_interval(lambda dt: lt.run(), self.CLOCK_SCHEDULE_INTERVAL)
             self.lt = lt
         print("Starting backend")
 
@@ -256,6 +262,9 @@ class MainLayout(Widget):
         else:
             self.tagBaseDist = self.lt.getDistance()
             self.tagPos = self.lt.getCoor()
+
+        if self.REVERSE_XY:
+            self.tagPos[0], self.tagPos[1] = self.tagPos[1], self.tagPos[0]
 
         # edge fix
         for i in range(len(self.tagPos)):

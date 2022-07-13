@@ -187,14 +187,15 @@ class Base:
 
 class MainLayout(Widget):
     num_of_base = 0
-    focused_base = None
     bases = []
     CENTIMETER_PER_PIXEL = 1.5  # how many centimeters a kivy pixel represents
 
     draw_path_has_started = False
     draw_path_event = None
 
-    FIRST_FLOOR_CELLING_HEIGHT = 1.5
+    FIRST_FLOOR_CELLING_HEIGHT = (
+        1.5  # h >= FIRST_FLOOR_CELLING_HEIGHT: 2F, h < FIRST_FLOOR_CELLING_HEIGHT: 1F
+    )
     FLOOR_COLORS = {
         "default": (0.9, 0.1, 0.1, 0.9),
         "1": (101 / 255, 9 / 255, 179 / 255, 1),
@@ -509,8 +510,8 @@ class MainLayout(Widget):
         while len(to_be_deleted_dot_idx_list) > 0:
             del self.alive_path_dot_list[to_be_deleted_dot_idx_list.pop()]
 
-        # print("to_be_deleted_dot_idx_list:\n\t", to_be_deleted_dot_idx_list)
         # print("len(self.alive_path_dot_list):\n\t", len(self.alive_path_dot_list))
+        pass
 
     def get_tag_pixel_pos(self):
         """Get tag position in pixel (unit: meter -> pixel)."""

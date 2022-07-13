@@ -1,11 +1,8 @@
-from random import random
-
 from kivy.config import Config
-
-import backend
 
 Config.read("./gui/lighTag/config.ini")
 
+from random import random
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.graphics import Color, Ellipse, Line
@@ -16,6 +13,8 @@ from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
+
+import backend
 
 # from kivy.lang.builder import Builder
 # Builder.load_file("ui.kv")
@@ -186,8 +185,8 @@ class Base:
 
 
 class MainLayout(Widget):
-    num_of_base = 0
-    bases = []
+    ioa_corners = []
+    ioa_edges = {}  # {edge_name: edge_object} e.g., {1-2: <edge object xxxx>}
     CENTIMETER_PER_PIXEL = 1.5  # how many centimeters a kivy pixel represents
 
     draw_path_has_started = False
@@ -284,12 +283,13 @@ class MainLayout(Widget):
         self.path_dot_color = self._get_floor_color(floor)
         self.ids.floor_label.color = self._get_floor_color(floor)
 
-        # DEBUG: print tag information
-        print(
-            "Tag: x={:.1f}m, y={:.1f}m, h={:.1f}m [({:.1f}, {:.1f}) pixel]".format(
-                *self.tagPos, *self.get_tag_pixel_pos()[:2]
-            )
-        )
+        # # DEBUG: print tag information
+        # print(
+        #     "Tag: x={:.1f}m, y={:.1f}m, h={:.1f}m [({:.1f}, {:.1f}) pixel]".format(
+        #         *self.tagPos, *self.get_tag_pixel_pos()[:2]
+        #     )
+        # )
+        pass
 
     def _get_floor_color(self, floor: str):
         return (
@@ -309,29 +309,59 @@ class MainLayout(Widget):
 
     def add_base(self):
         """Callback function for adding a base button to the canvas."""
-        base_id = self.num_of_base + 1
-        new_base = Button(
+        base_id = len(self.ioa_corners) + 1
+        new_corner = Button(
             text=str(base_id),
             font_size=13,
             size_hint=(None, None),
             size=(17, 17),
-            # pos_hint={"x": 0.5, "y": 0.5},
             pos=(
                 0,
                 self.ids.control_panel.height,
             ),  # pos of left-bottom corner of the button
             on_release=self._on_base_released,
         )
-        self.bases.append(new_base)
-        self.ids.canvas.add_widget(new_base)  # add widget to the canvas widget
-        self.num_of_base += 1
+        self.ioa_corners.append(new_corner)
+        self.ids.canvas.add_widget(new_corner)  # add widget to the canvas widget
+
+        # connect the 2 most recent added corners
+        if len(self.ioa_corners) >= 2:
+            start_corner = self.ioa_corners[-1]
+            end_corner = self.ioa_corners[-2]
+            new_edge_name = "{}-{}".format(start_corner.text, end_corner.text)
+            new_edge = Line(
+                points=[*start_corner.pos, *end_corner.pos],
+                width=2,
+                joint="round",
+                color=(1, 0, 0, 1),
+            )
+            self.ids.canvas.canvas.add(new_edge)
+            self.ioa_edges[new_edge_name] = new_edge
+        print(self.ioa_edges)
+
+    def update_edges(self, btn_id):
+        for edge_name in self.ioa_edges.keys():
+            curr_edge = self.ioa_edges[edge_name]
+            curr_corner = self.ioa_corners[int(btn_id) - 1]
+            start_corner_id, end_corner_id = edge_name.split("-")
+            start_corner_points, end_corner_points = (
+                curr_edge.points[0:2],
+                curr_edge.points[2:4],
+            )
+            if start_corner_id == str(btn_id):
+                start_corner_points = curr_corner.pos
+            elif end_corner_id == str(btn_id):
+                end_corner_points = curr_corner.pos
+            else:
+                continue
+
+            curr_edge.points = [*start_corner_points, *end_corner_points]
 
     def _on_base_released(self, base_btn):
         """Callback function for when the base button is released. A popup window will be created."""
 
         def popup_confirm(confirm_btn):
             """Callback function of confirm button in the base popup window."""
-            # print(confirm_btn)
             x = y = z = 0
             if base_x.text.isdigit():
                 x = float(base_x.text)
@@ -339,7 +369,7 @@ class MainLayout(Widget):
                 y = float(base_y.text)
             if base_z.text.isdigit():
                 z = float(base_z.text)
-            print(x, y, z)
+            # print(x, y, z)
             if x < 0:
                 x = 0
             elif x > self.ids.canvas_temp_label.size[0] - 17:
@@ -350,6 +380,9 @@ class MainLayout(Widget):
                 y = self.ids.canvas_temp_label.size[1] - 17
             base_btn.pos = [x, y + self.ids.control_panel.height]
             self.ids.canvas.remove_widget(popup)
+
+            # update all edges related to this moved button
+            self.update_edges(base_btn.text)
 
         def delete_base(delete_btn):
             """Callback function of delete button in the base popup window."""
@@ -433,11 +466,13 @@ class MainLayout(Widget):
         # print global positions of all the bases
         print("========= DEBUG messages =========")
         print("Base details:")
-        if len(self.bases) <= 0:
+        if len(self.ioa_corners) <= 0:
             print("\tNo base yet.")
         else:
-            for i in range(len(self.bases)):
-                print("\t[base {}] pos on window: {}]".format(i, self.bases[i].pos))
+            for i in range(len(self.ioa_corners)):
+                print(
+                    "\t[base {}] pos on window: {}]".format(i, self.ioa_corners[i].pos)
+                )
         print()
 
         # print all drawed circles

@@ -9,8 +9,8 @@ Using kivy library.
 ## [:page_with_curl:](https://gist.github.com/rxaviers/7360908) TODO
 - [x] :bangbang: add floor layer number onto screen
 - [ ] :bangbang: change base function into target area function, used to detect whether label has entered the area (use area color + voice to indicate whether has entered or not)
-- [ ] :exclamation: imporove math function speed
-- [ ] :exclamation: draw base position according to the beckend.py file's settings
+- [x] :exclamation: (try to :D ) improve math function speed
+- [ ] :exclamation: draw base position according to the backend.py file's settings
 - [ ] :exclamation: canvas range represent + x-y revert
 - [X] :exclamation: red dot -> larger
 - [ ] old dot fade out

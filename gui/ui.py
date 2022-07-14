@@ -16,7 +16,7 @@ from kivy.uix.widget import Widget
 
 import backend
 
-USE_BACKEND = True  # if False, won't connect backend, run simulation data instead
+USE_BACKEND = False  # if False, won't connect backend, run simulation data instead
 
 
 class MainLayout(Widget):
@@ -60,6 +60,16 @@ class MainLayout(Widget):
         )
 
     def start_backend(self):
+
+        base_a_coor = (0, 5.86, 2.0)
+        base_b_coor = (8.535, 5.86, 2.0)
+        base_c_coor = (8.535, 0, 2.0)
+        base_d_coor = (0.0, 0, 2.355)
+        self._draw_a_circle(self._meter_to_pixel(base_a_coor[0]), self._meter_to_pixel(base_a_coor[1]), 10, (0.1, 0.1, 0.9, 1))
+        self._draw_a_circle(self._meter_to_pixel(base_b_coor[0]), self._meter_to_pixel(base_b_coor[1]), 10, (0.1, 0.1, 0.9, 1))
+        self._draw_a_circle(self._meter_to_pixel(base_c_coor[0]), self._meter_to_pixel(base_c_coor[1]), 10, (0.1, 0.1, 0.9, 1))
+        self._draw_a_circle(self._meter_to_pixel(base_d_coor[0]), self._meter_to_pixel(base_d_coor[1]), 10, (0.1, 0.1, 0.9, 1))
+
         if not USE_BACKEND:
             self.tagPos = [2, 2, 2]
             self.tagBaseDist = [7.777, 7.777, 7.777, 7.777]
@@ -89,10 +99,10 @@ class MainLayout(Widget):
             # lt.setBaseBCoor(0, 8.535, 2.0)
             # lt.setBaseCCoor(5.86, 8.535, 2.0)
             # lt.setBaseDCoor(5.86, 0.0, 2.355)
-            lt.setBaseACoor(0, 5.86, 2.0)
-            lt.setBaseBCoor(8.535, 5.86, 2.0)
-            lt.setBaseCCoor(8.535, 0, 2.0)
-            lt.setBaseDCoor(0.0, 0, 2.355)
+            lt.setBaseACoor(*base_a_coor)
+            lt.setBaseBCoor(*base_b_coor)
+            lt.setBaseCCoor(*base_c_coor)
+            lt.setBaseDCoor(*base_d_coor)
             Clock.schedule_interval(lambda dt: lt.run(), self.CLOCK_SCHEDULE_INTERVAL)
             self.lt = lt
         print("Starting backend")
@@ -240,7 +250,11 @@ class MainLayout(Widget):
 
     def _draw_a_line(self, start_pos, end_pos):
         color = Color(1, 0, 0, 0.7)
-        line = Line(points=[*start_pos, *end_pos], width=2, joint="round",)
+        line = Line(
+            points=[*start_pos, *end_pos],
+            width=2,
+            joint="round",
+        )
         self.ids.canvas.canvas.add(color)
         self.ids.canvas.canvas.add(line)
 
@@ -520,7 +534,8 @@ class MainLayout(Widget):
         # canvas add new color and circle
         circle_color = Color(*color)
         circle_instance = Ellipse(
-            pos=(x, y + self.ids.control_panel.height), size=(d, d),
+            pos=(x, y + self.ids.control_panel.height),
+            size=(d, d),
         )
         self.ids.canvas.canvas.add(circle_color)
         self.ids.canvas.canvas.add(circle_instance)
@@ -548,6 +563,9 @@ class MainLayout(Widget):
                 pixel_pos[i] * 100 / self.CENTIMETER_PER_PIXEL
             )  # m * cm/m / cm/px
         return pixel_pos
+
+    def _meter_to_pixel(self, x):
+        return x * 100 / self.CENTIMETER_PER_PIXEL
 
 
 class UIApp(App):

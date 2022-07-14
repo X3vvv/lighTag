@@ -16,7 +16,7 @@ from kivy.uix.widget import Widget
 
 import backend
 
-USE_BACKEND = False  # if False, won't connect backend, run simulation data instead
+USE_BACKEND = True  # if False, won't connect backend, run simulation data instead
 
 
 class MainLayout(Widget):
@@ -240,11 +240,7 @@ class MainLayout(Widget):
 
     def _draw_a_line(self, start_pos, end_pos):
         color = Color(1, 0, 0, 0.7)
-        line = Line(
-            points=[*start_pos, *end_pos],
-            width=2,
-            joint="round",
-        )
+        line = Line(points=[*start_pos, *end_pos], width=2, joint="round",)
         self.ids.canvas.canvas.add(color)
         self.ids.canvas.canvas.add(line)
 
@@ -524,8 +520,7 @@ class MainLayout(Widget):
         # canvas add new color and circle
         circle_color = Color(*color)
         circle_instance = Ellipse(
-            pos=(x, y + self.ids.control_panel.height),
-            size=(d, d),
+            pos=(x, y + self.ids.control_panel.height), size=(d, d),
         )
         self.ids.canvas.canvas.add(circle_color)
         self.ids.canvas.canvas.add(circle_instance)

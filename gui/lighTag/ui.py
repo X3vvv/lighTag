@@ -204,11 +204,7 @@ class MainLayout(Widget):
 
     def _draw_a_line(self, start_pos, end_pos):
         color = Color(1, 0, 0, 0.7)
-        line = Line(
-            points=[*start_pos, *end_pos],
-            width=2,
-            joint="round",
-        )
+        line = Line(points=[*start_pos, *end_pos], width=2, joint="round",)
         self.ids.canvas.canvas.add(color)
         self.ids.canvas.canvas.add(line)
 
@@ -244,19 +240,63 @@ class MainLayout(Widget):
         start_corner_id, end_corner_id = edge_name.split("-")
         return start_corner_id, end_corner_id
 
-    def is_in_the_area(
-        self, target_pos, ul_corner_pos, ur_corner_pos, ll_corner_pos, lr_corner_pos
-    ):
+    def is_in_the_area(self, target_dot, area_corners):
         """
-        Return True if the target position is inside the area consist of four corners (upper-left, upper-right, lower-left, lower-right).
+        Return True if the target position is inside the area.
 
         #Params
-        target_pos: (x, y) position of the target dot.
-        ul_corner_pos: (x, y) position of the upper-left corner of the area.
-        ur_corner_pos: (x, y) position of the upper-right corner of the area.
-        ll_corner_pos: (x, y) position of the lower-left corner of the area.
-        lr_corner_pos: (x, y) position of the lower-left corner of the area.
+        target_dot: (x, y) position of the target dot.
+        area_corners: a list of (x, y) position tuple of all the corners of the area. e.g., [(1,2), (2,4), (4,3)]
         """
+
+        def ray_method(xt, yt, x1, y1, x2, y2) -> int:
+            """
+            Whether the ray starts from (xt, yt) will cross the line segment with endpoints of (x1, y1) & (x2, y2).
+
+            #Param:
+            xt, yt: endpoint of the ray.
+            x1, y1, x2, y2: the two endpoints of the line segment.
+
+            #Return:
+            -1: the ray hasn't crossed the line segment (situation where the intersection point is the 
+                lower endpoint of the line segment is also counted as not cross)
+            0: the ray has crossed the line segment and the intersection point is the upper endpoint of the line 
+                segment 
+            1: the ray has crossed the middle of the line segment
+            """
+            # since ray is parallel with x-axis, ignore lines that are also parallel with x-axis
+            if y1 == y2:
+                return -1
+
+            # roughly check whether the ray (y=yt, where x>=xt) can cross the line segment
+            if yt < min(y1, y2) or yt > max(y1, y2):
+                return -1
+
+            # get the x-axis value of the intersection point (x, yt)
+            x = (yt - y2) * (x1 - x2) / (y1 - y2) + x2
+
+            # no intersection point -> not crossing
+            if x < xt:
+                return -1
+
+            # has intersection point on the upper endpoint -> crossing on endpoint
+            upper_endpoint = (x1, y1) if y1 > y2 else (x2, y2)
+            if xt == upper_endpoint[0] and yt == upper_endpoint[1]:
+                return 0
+
+            # has intersection point on the upper endpoint -> not crossing
+            lower_endpoint = (x1, y1) if y1 < y2 else (x2, y2)
+            if xt == lower_endpoint[0] and yt == lower_endpoint[1]:
+                return -1
+
+            # has intersection point on middle of the line segment -> crossing
+            return 1
+
+        crossing_result = []
+        for i in range(len(area_corners)):
+            x1, y1 = area_corners[i]
+            x2, y2 = area_corners[(i + 1) % len(area_corners)]
+            crossing_result.append(ray_method(*target_dot, x1, y1, x2, y2))
         pass
 
     def _on_base_released(self, base_btn):
@@ -431,8 +471,7 @@ class MainLayout(Widget):
         # canvas add new color and circle
         circle_color = Color(*color)
         circle_instance = Ellipse(
-            pos=(x, y + self.ids.control_panel.height),
-            size=(d, d),
+            pos=(x, y + self.ids.control_panel.height), size=(d, d),
         )
         self.ids.canvas.canvas.add(circle_color)
         self.ids.canvas.canvas.add(circle_instance)

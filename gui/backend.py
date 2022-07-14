@@ -6,6 +6,7 @@ import numpy as np
 from numpy import *
 import serial
 import serial.tools.list_ports
+import time
 
 
 class lighTagAlgo:
@@ -101,6 +102,12 @@ class lighTagAlgo:
         For WIFI data
         """
         bytes = self.client.recv(1024)
+        print(
+            "[{}.{}]: ".format(
+                time.strftime("%H:%M:%S", time.localtime()), int(time.time() * 10) % 10
+            ),
+            end="",
+        )
         return bytes.hex()
 
     def getSerialData(self):
@@ -241,48 +248,40 @@ class lighTagAlgo:
         return [locx, locy]
 
     def calculateQuartPosition(self):
-        [a, b] = self.calculateTriPosition()
+        [a,b] = self.calculateTriPosition()
         z1 = sympy.symbols("z1")
-        f1 = (
-            np.square(a - self.xD)
-            + np.square(b - self.yD)
-            + np.square(z1 - self.zD)
-            - np.square(self.disArr[3])
-        )
-        rst1 = sympy.solve(f1, z1)
-
+        f1 = np.square(a-self.xD)+np.square(b-self.yD)+np.square(z1-self.zD)-np.square(self.disArr[3])
+        rst1 = sympy.solve(f1,z1)
+        
         z2 = sympy.symbols("z2")
-        f2 = (
-            np.square(a - self.xB)
-            + np.square(b - self.yB)
-            + np.square(z2 - self.zB)
-            - np.square(self.disArr[1])
-        )
-        rst2 = sympy.solve(f2, z2)
-
-        if complex(list(rst1)[0]).real > complex(list(rst1)[1]).real:
-            list(rst1)[0], list(rst1)[1] = list(rst1)[1], list(rst1)[0]
-
-        if complex(list(rst2)[0]).real > complex(list(rst2)[1]).real:
-            list(rst2)[0], list(rst2)[1] = list(rst2)[1], list(rst2)[0]
-
-        min1 = abs(list(rst1)[0] - list(rst2)[0])
-        min2 = abs(list(rst1)[1] - list(rst2)[1])
-
-        min0 = min(min1, min2)
-
+        f2 = np.square(a-self.xB)+np.square(b-self.yB)+np.square(z2-self.zB)-np.square(self.disArr[1])
+        rst2 = sympy.solve(f2,z2)
+        
+        sol1 = list(rst1)
+        sol2 = list(rst2)
+        
+        if (complex(sol1[0]).real>complex(sol1[1]).real):
+            sol1[0],sol1[1] = sol1[1],sol1[0]
+            
+        if (complex(sol2[0]).real>complex(sol2[1]).real):
+            sol2[0],sol2[1] = sol2[1],sol2[0]
+        
+        min1 = abs(sol1[0]-sol2[0])
+        min2 = abs(sol1[1]-sol2[1])
+        
+        min0 = min(min1,min2)
+        
         out = 0
-
+        
         if min0 == min1:
-            out = (list(rst1)[0] + list(rst2)[0]) / 2
+            out = (sol1[0] + sol2[0])/2
         elif min0 == min2:
-            out = (list(rst1)[0] + list(rst2)[1]) / 2
-
+            out = (sol1[1] + sol2[1])/2
+            
         out = complex(out).real
-
-        coor = [a, b, out]
-        self.coorArr = coor
-        return coor
+        
+        self.coorArr = [a,b,out]
+        return [a,b,out]
 
     def getCoor(self):
         """return the coordinates of the tag
@@ -396,7 +395,8 @@ class lighTagAlgo:
         dis = self.convertDistance(str)
 
         if dis != -1:  # check if the distance is valid
-            self.calculateQuartPosition()  # calculate the coordinates of the tag
+            return self.calculateQuartPosition()  # calculate the coordinates of the tag
+        return -1
 
 
 def test():

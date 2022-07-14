@@ -3,6 +3,9 @@ from kivy.config import Config
 Config.read("./gui/config.ini")
 
 from random import random
+from threading import Thread
+import time
+from tqdm import tqdm
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.graphics import Color, Ellipse, Line, Rectangle
@@ -48,6 +51,8 @@ class MainLayout(Widget):
     alive_path_dot_list = []  # stores a list of (color, circle) tuples
     PATH_DOT_LIFETIME = 6  # (unit: update time) each path dot's life time, old dots will gradually fade out and be removed from the alive_path_dot_list lise
 
+    backend_thread = None
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -65,17 +70,43 @@ class MainLayout(Widget):
         base_b_coor = (8.535, 5.86, 2.0)
         base_c_coor = (8.535, 0, 2.0)
         base_d_coor = (0.0, 0, 2.355)
-        self._draw_a_circle(self._meter_to_pixel(base_a_coor[0]), self._meter_to_pixel(base_a_coor[1]), 10, (0.1, 0.1, 0.9, 1))
-        self._draw_a_circle(self._meter_to_pixel(base_b_coor[0]), self._meter_to_pixel(base_b_coor[1]), 10, (0.1, 0.1, 0.9, 1))
-        self._draw_a_circle(self._meter_to_pixel(base_c_coor[0]), self._meter_to_pixel(base_c_coor[1]), 10, (0.1, 0.1, 0.9, 1))
-        self._draw_a_circle(self._meter_to_pixel(base_d_coor[0]), self._meter_to_pixel(base_d_coor[1]), 10, (0.1, 0.1, 0.9, 1))
+        self._draw_a_circle(
+            self._meter_to_pixel(base_a_coor[0]),
+            self._meter_to_pixel(base_a_coor[1]),
+            10,
+            (0.1, 0.1, 0.9, 1),
+        )
+        self._draw_a_circle(
+            self._meter_to_pixel(base_b_coor[0]),
+            self._meter_to_pixel(base_b_coor[1]),
+            10,
+            (0.1, 0.1, 0.9, 1),
+        )
+        self._draw_a_circle(
+            self._meter_to_pixel(base_c_coor[0]),
+            self._meter_to_pixel(base_c_coor[1]),
+            10,
+            (0.1, 0.1, 0.9, 1),
+        )
+        self._draw_a_circle(
+            self._meter_to_pixel(base_d_coor[0]),
+            self._meter_to_pixel(base_d_coor[1]),
+            10,
+            (0.1, 0.1, 0.9, 1),
+        )
 
         if not USE_BACKEND:
             self.tagPos = [2, 2, 2]
             self.tagBaseDist = [7.777, 7.777, 7.777, 7.777]
 
+            def simulate_data_loop():
+                while 1:
+                    gen_simulate_data()
+
             def gen_simulate_data():
                 # simulate tagPos change
+                for i in range(50000000):
+                    pass
                 xy_delta = 1
                 z_delta = 1
                 self.tagPos[0] += random() * xy_delta - xy_delta / 2
@@ -87,9 +118,16 @@ class MainLayout(Widget):
                 for i in range(len(self.tagBaseDist)):
                     self.tagBaseDist[i] += random() * dist_delta - dist_delta / 2
 
-            Clock.schedule_interval(
-                lambda dt: gen_simulate_data(), self.CLOCK_SCHEDULE_INTERVAL
+                print("[{:.1f}] Generate simulate data.".format(time.time() % 10000))
+
+            # Clock.schedule_interval(
+            #     lambda dt: gen_simulate_data(), self.CLOCK_SCHEDULE_INTERVAL
+            # )
+            self.backend_thread = Thread(
+                target=simulate_data_loop, name="BackendThread"
             )
+            self.backend_thread.daemon = True  # thread dies when app is closed
+            self.backend_thread.start()
 
         else:
             lt = backend.lighTagAlgo()
@@ -103,7 +141,16 @@ class MainLayout(Widget):
             lt.setBaseBCoor(*base_b_coor)
             lt.setBaseCCoor(*base_c_coor)
             lt.setBaseDCoor(*base_d_coor)
-            Clock.schedule_interval(lambda dt: lt.run(), self.CLOCK_SCHEDULE_INTERVAL)
+
+            def backend_loop():
+                time.sleep(0.1)
+                lt.run()
+
+            # Clock.schedule_interval(lambda dt: lt.run(), self.CLOCK_SCHEDULE_INTERVAL)
+            self.backend_thread = Thread(target=backend_loop, name="BackendThread")
+            self.backend_thread.daemon = True
+            self.backend_thread.start()
+
             self.lt = lt
         print("Starting backend")
 
@@ -111,21 +158,11 @@ class MainLayout(Widget):
         """Update text of tag-base distances label on the window."""
         if not USE_BACKEND:
             # haven't connected to backend, simulate tag's data
-            self.tagBaseDist = self.tagBaseDist
-            self.tagPos = self.tagPos
+            pass
         else:
             # get data from backend
             self.tagBaseDist = self.lt.getDistance()
             self.tagPos = self.lt.getCoor()
-
-        # reverse X-Y axis if needed
-        # if self.REVERSE_XY:
-        #     self.tagPos[0], self.tagPos[1] = self.tagPos[1], self.tagPos[0]
-
-        # fix cross borders problem
-        for i in range(len(self.tagPos)):
-            if self.tagPos[i] < 0:
-                self.tagPos[i] = 0
 
         # update tag_distance label
         self.ids.tag_distance.text = "Tag info (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}\n\n(x:{:.1f}, y:{:.1f}, h:{:.1f})".format(
@@ -558,6 +595,12 @@ class MainLayout(Widget):
     def _get_tag_pixel_pos(self):
         """Get tag position in pixel (unit: meter -> pixel)."""
         pixel_pos = self.tagPos.copy()
+
+        # fix cross borders problem
+        for i in range(len(pixel_pos)):
+            if pixel_pos[i] < 0:
+                pixel_pos[i] = 0
+
         for i in range(len(pixel_pos)):
             pixel_pos[i] = (
                 pixel_pos[i] * 100 / self.CENTIMETER_PER_PIXEL

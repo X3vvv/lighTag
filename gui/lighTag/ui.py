@@ -23,8 +23,8 @@ DEBUG_UI = True  # if True, won't connect backend, run simulation data instead
 
 
 class MainLayout(Widget):
-    ioa_corners = []
-    ioa_edges = {
+    aoi_corners = []
+    aoi_edges = {
         "normal": {},
         "closing line": {},
     }  # {edge_name: edge_object} e.g., {1-2: <edge object xxxx>}
@@ -127,6 +127,36 @@ class MainLayout(Widget):
         self.path_dot_color = self._get_floor_color(floor)
         self.ids.floor_label.color = self._get_floor_color(floor)
 
+        # check whether in the target area
+        if len(self.aoi_corners) < 3:
+            return
+        if self.is_in_the_area(
+            (
+                self._get_tag_pixel_pos()[0],
+                self._get_tag_pixel_pos()[1] + self.ids.control_panel.height,
+            ),
+            self._get_all_aoi_corners_pos(),
+        ):
+            print(
+                "[√] tag {}, is inside area made of {}".format(
+                    (
+                        self._get_tag_pixel_pos()[0],
+                        self._get_tag_pixel_pos()[1] + self.ids.control_panel.height,
+                    ),
+                    self.aoi_corners,
+                )
+            )
+        else:
+            print(
+                "[X] tag {}, is inside area made of {}".format(
+                    (
+                        self._get_tag_pixel_pos()[0],
+                        self._get_tag_pixel_pos()[1] + self.ids.control_panel.height,
+                    ),
+                    self.aoi_corners,
+                )
+            )
+
     def _get_floor_color(self, floor: str):
         """Get the floor color according to the floor layer."""
         if floor in self.FLOOR_COLORS.keys():
@@ -145,7 +175,7 @@ class MainLayout(Widget):
 
     def add_AOI_corner(self):
         """Callback function for adding a base button to the canvas."""
-        corner_id = len(self.ioa_corners) + 1
+        corner_id = len(self.aoi_corners) + 1
         new_corner = Button(
             text=str(corner_id),
             font_size=13,
@@ -157,54 +187,63 @@ class MainLayout(Widget):
             ),  # pos of left-bottom corner of the button
             on_release=self._on_base_released,
         )
-        self.ioa_corners.append(new_corner)
+        self.aoi_corners.append(new_corner)
         self.ids.canvas.add_widget(new_corner)  # add widget to the canvas widget
 
         # connect the 2 most recent added corners
-        if len(self.ioa_corners) >= 2:
-            self.create_edge(-1, -2)
+        if len(self.aoi_corners) >= 2:
+            self._create_edge(-1, -2)
 
         # connect the last corner with the first corner
-        if len(self.ioa_corners) >= 3:
+        if len(self.aoi_corners) >= 3:
             assert (
-                len(self.ioa_edges["closing line"]) <= 1
-                and len(self.ioa_edges["closing line"]) >= 0
+                len(self.aoi_edges["closing line"]) <= 1
+                and len(self.aoi_edges["closing line"]) >= 0
             )
 
             # remove last closing line
-            if len(self.ioa_edges["closing line"]) == 1:
-                old_closing_line = list(self.ioa_edges["closing line"].values())[0]
+            if len(self.aoi_edges["closing line"]) == 1:
+                old_closing_line = list(self.aoi_edges["closing line"].values())[0]
                 self.remove_instance_from_canvas(old_closing_line)
-                self.ioa_edges["closing line"].clear()
+                self.aoi_edges["closing line"].clear()
 
             # create a new closing line
-            self.create_edge(0, -1, "closing line")
+            self._create_edge(0, -1, "closing line")
 
-        print(self.ioa_edges)
+    def _get_all_aoi_corners_pos(self):
+        """Return position of all corners of AOI. e.g., [(330, 220), (220, 330), (0, 250)]"""
+        all_corners_pos = []
+        for corner in self.aoi_corners:
+            all_corners_pos.append(corner.pos)
+        return all_corners_pos
 
     def remove_instance_from_canvas(self, inst):
         self.ids.canvas.canvas.remove(inst)
 
-    def create_edge(self, start_corner_idx, end_corner_idx, edge_type: str = "normal"):
+    def _create_edge(self, start_corner_idx, end_corner_idx, edge_type: str = "normal"):
         """
         Create a edge between the corners of AOI (Area of Interests).
         #Params
-        start_corner_idx: index (for 'ioa_corners' array) of the AOI cornor where the edge starts from.
-        end_corner_idx: index (for 'ioa_corners' array) of the AOI cornor where the edge ends to.
+        start_corner_idx: index (for 'aoi_corners' array) of the AOI cornor where the edge starts from.
+        end_corner_idx: index (for 'aoi_corners' array) of the AOI cornor where the edge ends to.
         edge_type: type of this edge, whether a edge created automatically to close the AOI.
         """
         if edge_type != "normal" and edge_type != "closing line":
             raise ValueError("Edge type can only be 'normal' or 'closing line'.")
-        start_corner = self.ioa_corners[start_corner_idx]
-        end_corner = self.ioa_corners[end_corner_idx]
+        start_corner = self.aoi_corners[start_corner_idx]
+        end_corner = self.aoi_corners[end_corner_idx]
         new_edge_name = "{}-{}".format(start_corner.text, end_corner.text)
         new_edge = self._draw_a_line(start_corner.pos, end_corner.pos)
-        self.ioa_edges[edge_type][new_edge_name] = new_edge
+        self.aoi_edges[edge_type][new_edge_name] = new_edge
         return new_edge
 
     def _draw_a_line(self, start_pos, end_pos):
         color = Color(1, 0, 0, 0.7)
-        line = Line(points=[*start_pos, *end_pos], width=2, joint="round",)
+        line = Line(
+            points=[*start_pos, *end_pos],
+            width=2,
+            joint="round",
+        )
         self.ids.canvas.canvas.add(color)
         self.ids.canvas.canvas.add(line)
 
@@ -212,10 +251,10 @@ class MainLayout(Widget):
 
     def update_edges(self, corner_id):
         """Update all the edges of the AOI (area of interests). Called when path dots' position are changed."""
-        for edge_type in self.ioa_edges.keys():
-            for edge_name in self.ioa_edges[edge_type].keys():
-                curr_edge = self.ioa_edges[edge_type][edge_name]
-                curr_corner = self.ioa_corners[int(corner_id) - 1]
+        for edge_type in self.aoi_edges.keys():
+            for edge_name in self.aoi_edges[edge_type].keys():
+                curr_edge = self.aoi_edges[edge_type][edge_name]
+                curr_corner = self.aoi_corners[int(corner_id) - 1]
                 start_corner_id, end_corner_id = self._get_corners_by_edge_name(
                     edge_name
                 )
@@ -240,7 +279,7 @@ class MainLayout(Widget):
         start_corner_id, end_corner_id = edge_name.split("-")
         return start_corner_id, end_corner_id
 
-    def is_in_the_area(self, target_dot, area_corners):
+    def is_in_the_area(self, target_dot, area_corners) -> bool:
         """
         Return True if the target position is inside the area.
 
@@ -285,12 +324,13 @@ class MainLayout(Widget):
             # - crossed in the middle of the line segment
             return xp >= xt
 
-        crossing_result = []
+        cross_times = 0
         for i in range(len(area_corners)):
             x1, y1 = area_corners[i]
             x2, y2 = area_corners[(i + 1) % len(area_corners)]
-            crossing_result.append(ray_method(*target_dot, x1, y1, x2, y2))
-        pass
+            if ray_method(*target_dot, x1, y1, x2, y2):
+                cross_times += 1
+        return (cross_times % 2) == 1
 
     def _on_base_released(self, base_btn):
         """Callback function for when the base button is released. A popup window will be created."""
@@ -402,12 +442,12 @@ class MainLayout(Widget):
         # print global positions of all the bases
         print("========= DEBUG messages =========")
         print("Base details:")
-        if len(self.ioa_corners) <= 0:
+        if len(self.aoi_corners) <= 0:
             print("\tNo base yet.")
         else:
-            for i in range(len(self.ioa_corners)):
+            for i in range(len(self.aoi_corners)):
                 print(
-                    "\t[base {}] pos on window: {}]".format(i, self.ioa_corners[i].pos)
+                    "\t[base {}] pos on window: {}]".format(i, self.aoi_corners[i].pos)
                 )
         print()
 
@@ -417,13 +457,29 @@ class MainLayout(Widget):
             print("\t{}\n\t{}\n".format(color, circle))
         print()
 
+        # print AOI corners
+        print("All AOI corners:")
+        for corner in self.aoi_corners:
+            print("\t", corner.pos)
+
+        # print target point
+        print("Target point:")
+        print("\t", self._get_tag_pixel_pos())
+
+    def get_all_AOI_edges(self):
+        all_edges = []
+        for edge_type in self.aoi_edges.keys():
+            for edge in self.aoi_edges[edge_type].values():
+                all_edges.append(edge)
+        return all_edges
+
     def on_plot_path_released(self):
         """Callback function of 'plot path' button."""
 
         def draw_path_callback():
             # draw a circle on the canvas
             new_path_dot_color, new_path_dot = self._draw_a_circle(
-                *self.get_tag_pixel_pos()[:2],
+                *self._get_tag_pixel_pos()[:2],
                 self.PATH_DOT_DIAMETER_IN_PIXEL,
                 self.path_dot_color,
             )
@@ -444,7 +500,7 @@ class MainLayout(Widget):
         # is NOT drawing path, will start drawing
         else:
             self.draw_path_event = Clock.schedule_interval(
-                lambda dt: draw_path_callback, 1
+                lambda dt: draw_path_callback(), 1
             )
             self.draw_path_has_started = True
             # print("-- Draw path event has started")
@@ -464,18 +520,11 @@ class MainLayout(Widget):
         # canvas add new color and circle
         circle_color = Color(*color)
         circle_instance = Ellipse(
-            pos=(x, y + self.ids.control_panel.height), size=(d, d),
+            pos=(x, y + self.ids.control_panel.height),
+            size=(d, d),
         )
         self.ids.canvas.canvas.add(circle_color)
         self.ids.canvas.canvas.add(circle_instance)
-
-        # # draw a circle onto the canvas
-        # with self.ids.canvas.canvas:
-        #     Color(*color)
-        #     Ellipse(
-        #         pos=(x, y + self.ids.control_panel.height),
-        #         size=(d, d),
-        #     )
 
         return circle_color, circle_instance
 
@@ -492,7 +541,7 @@ class MainLayout(Widget):
         for dot_idx in to_be_deleted_dot_idx_list:
             del self.alive_path_dot_list[dot_idx]
 
-    def get_tag_pixel_pos(self):
+    def _get_tag_pixel_pos(self):
         """Get tag position in pixel (unit: meter -> pixel)."""
         pixel_pos = self.tagPos.copy()
         for i in range(len(pixel_pos)):

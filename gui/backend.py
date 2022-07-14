@@ -102,12 +102,12 @@ class lighTagAlgo:
         For WIFI data
         """
         bytes = self.client.recv(1024)
-        print(
-            "[{}.{}]: ".format(
-                time.strftime("%H:%M:%S", time.localtime()), int(time.time() * 10) % 10
-            ),
-            end="",
-        )
+        # print(
+        #     "[{}.{}]: ".format(
+        #         time.strftime("%H:%M:%S", time.localtime()), int(time.time() * 10) % 10
+        #     ),
+        #     end="",
+        # )
         return bytes.hex()
 
     def getSerialData(self):

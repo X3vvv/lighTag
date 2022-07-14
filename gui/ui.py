@@ -16,22 +16,11 @@ from kivy.uix.widget import Widget
 
 import backend
 
-# from kivy.lang.builder import Builder
-# Builder.load_file("ui.kv")
-
-USE_BACKEND = False  # if False, won't connect backend, run simulation data instead
+USE_BACKEND = True  # if False, won't connect backend, run simulation data instead
 
 
 class MainLayout(Widget):
-    aoi_corners = []
-    aoi_edges = {
-        "normal": {},
-        "closing line": {},
-    }  # {edge_name: edge_object} e.g., {1-2: <edge object xxxx>}
     CENTIMETER_PER_PIXEL = 1.5  # how many centimeters a kivy pixel represents
-
-    draw_path_has_started = False
-    draw_path_event = None
 
     FIRST_FLOOR_CELLING_HEIGHT = (
         1.5  # h >= FIRST_FLOOR_CELLING_HEIGHT: 2F, h < FIRST_FLOOR_CELLING_HEIGHT: 1F
@@ -43,12 +32,21 @@ class MainLayout(Widget):
     }
     path_dot_color = None  # color of the dot used to draw the path
 
-    PATH_DOT_DIAMETER_IN_PIXEL = 10
+    aoi_corners = []
+    aoi_edges = {
+        "normal": {},
+        "closing line": {},
+    }  # {edge_name: edge_object} e.g., {1-2: <edge object xxxx>}
+
+    draw_path_has_started = False
+    draw_path_event = None
+
+    PATH_DOT_DIAMETER_IN_PIXEL = 20
     # REVERSE_XY = True  # reverse x-y axis
     CLOCK_SCHEDULE_INTERVAL = 1  # interval of the callbacks added to the clock
 
     alive_path_dot_list = []  # stores a list of (color, circle) tuples
-    PATH_DOT_LIFETIME = 8  # (unit: update time) each path dot's life time, old dots will gradually fade out and be removed from the alive_path_dot_list lise
+    PATH_DOT_LIFETIME = 6  # (unit: update time) each path dot's life time, old dots will gradually fade out and be removed from the alive_path_dot_list lise
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

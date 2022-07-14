@@ -44,7 +44,7 @@ class MainLayout(Widget):
     path_dot_color = None  # color of the dot used to draw the path
 
     PATH_DOT_DIAMETER_IN_PIXEL = 10
-    REVERSE_XY = True  # reverse x-y axis
+    # REVERSE_XY = True  # reverse x-y axis
     CLOCK_SCHEDULE_INTERVAL = 1  # interval of the callbacks added to the clock
 
     alive_path_dot_list = []  # stores a list of (color, circle) tuples
@@ -106,8 +106,8 @@ class MainLayout(Widget):
             self.tagPos = self.lt.getCoor()
 
         # reverse X-Y axis if needed
-        if self.REVERSE_XY:
-            self.tagPos[0], self.tagPos[1] = self.tagPos[1], self.tagPos[0]
+        # if self.REVERSE_XY:
+        #     self.tagPos[0], self.tagPos[1] = self.tagPos[1], self.tagPos[0]
 
         # fix cross borders problem
         for i in range(len(self.tagPos)):

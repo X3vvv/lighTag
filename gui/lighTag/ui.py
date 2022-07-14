@@ -249,7 +249,7 @@ class MainLayout(Widget):
         area_corners: a list of (x, y) position tuple of all the corners of the area. e.g., [(1,2), (2,4), (4,3)]
         """
 
-        def ray_method(xt, yt, x1, y1, x2, y2) -> int:
+        def ray_method(xt, yt, x1, y1, x2, y2) -> bool:
             """
             Whether the ray starts from (xt, yt) will cross the line segment with endpoints of (x1, y1) & (x2, y2).
 
@@ -258,39 +258,32 @@ class MainLayout(Widget):
             x1, y1, x2, y2: the two endpoints of the line segment.
 
             #Return:
-            -1: the ray hasn't crossed the line segment (situation where the intersection point is the 
-                lower endpoint of the line segment is also counted as not cross)
-            0: the ray has crossed the line segment and the intersection point is the upper endpoint of the line 
-                segment 
-            1: the ray has crossed the middle of the line segment
+            True if ray crossed the line segment (exclude the lower endpoint).
             """
-            # since ray is parallel with x-axis, ignore lines that are also parallel with x-axis
+
+            # if (xt, yt) on line segment, crossed
+            if min(x1, x2) <= xt <= max(x1, x2):
+                if y1 == y2 and yt == y1:
+                    return True
+                if xt == (yt - y2) * (x1 - x2) / (y1 - y2) + x2:
+                    return True
+
+            # ignore horizontal line segment
             if y1 == y2:
-                return -1
+                return False
 
-            # roughly check whether the ray (y=yt, where x>=xt) can cross the line segment
+            # find whether crossing
+            # - exclude the situation where crossing on the extension of the line segment
             if yt < min(y1, y2) or yt > max(y1, y2):
-                return -1
-
-            # get the x-axis value of the intersection point (x, yt)
-            x = (yt - y2) * (x1 - x2) / (y1 - y2) + x2
-
-            # no intersection point -> not crossing
-            if x < xt:
-                return -1
-
-            # has intersection point on the upper endpoint -> crossing on endpoint
-            upper_endpoint = (x1, y1) if y1 > y2 else (x2, y2)
-            if xt == upper_endpoint[0] and yt == upper_endpoint[1]:
-                return 0
-
-            # has intersection point on the upper endpoint -> not crossing
+                return False
+            xp = (yt - y2) * (x1 - x2) / (y1 - y2) + x2
+            # - lower endpoint doesn't count
             lower_endpoint = (x1, y1) if y1 < y2 else (x2, y2)
-            if xt == lower_endpoint[0] and yt == lower_endpoint[1]:
-                return -1
+            if xp == lower_endpoint[0] and yt == lower_endpoint[1]:
+                return False
 
-            # has intersection point on middle of the line segment -> crossing
-            return 1
+            # - crossed in the middle of the line segment
+            return xp >= xt
 
         crossing_result = []
         for i in range(len(area_corners)):

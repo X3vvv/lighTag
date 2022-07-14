@@ -8,51 +8,57 @@ polygon = [(1, 1), (5, 4), (2, 5), (4, 2)]
 
 def is_in_tria(x, y):
     cross_n = 0
-    cross_edge_n = 0
 
     for i in range(len(triangle)):
-        is_crossed, crossed_on_edge = has_crossed(
+        is_crossed = new_ray_method(
             x, y, *triangle[i], *triangle[(i + 1) % len(triangle)]
         )
         if is_crossed:
             cross_n += 1
-            if crossed_on_edge:
-                cross_edge_n += 1
-
-    if cross_edge_n > 0:
-        cross_n = cross_n - cross_edge_n + 1
 
     # print("Cross time:", cross_n)
-    # return (cross_n % 2) == 1
-    if (cross_n % 2) != 1:
-        return False
-
-    # 2nd time
-    cross_n = 0
-    cross_edge_n = 0
-
-    for i in range(len(triangle)):
-        is_crossed, crossed_on_edge = has_crossed(
-            x, y, *triangle[i], *triangle[(i + 1) % len(triangle)], -1
-        )
-        if is_crossed:
-            cross_n += 1
-            if crossed_on_edge:
-                cross_edge_n += 1
-
-    if cross_edge_n > 0:
-        cross_n = cross_n - cross_edge_n + 1
-
-    # print("Cross time:", cross_n)
-    # return (cross_n % 2) == 1
-    if (cross_n % 2) != 1:
-        return False
-
-    return True
+    return (cross_n % 2) == 1
 
 
 def is_in_poly(x, y):
     pass
+
+
+def new_ray_method(xt, yt, x1, y1, x2, y2) -> bool:
+    """
+    Whether the ray starts from (xt, yt) will cross the line segment with endpoints of (x1, y1) & (x2, y2).
+
+    #Param:
+    xt, yt: endpoint of the ray.
+    x1, y1, x2, y2: the two endpoints of the line segment.
+
+    #Return:
+    True if ray crossed the line segment (exclude the lower endpoint).
+    """
+
+    # if (xt, yt) on line segment, crossed
+    if min(x1, x2) <= xt <= max(x1, x2):
+        if y1 == y2 and yt == y1:
+            return True
+        if xt == (yt - y2) * (x1 - x2) / (y1 - y2) + x2:
+            return True
+
+    # ignore horizontal line segment
+    if y1 == y2:
+        return False
+
+    # find whether crossing
+    # - exclude the situation where crossing on the extension of the line segment
+    if yt < min(y1, y2) or yt > max(y1, y2):
+        return False
+    xp = (yt - y2) * (x1 - x2) / (y1 - y2) + x2
+    # - lower endpoint doesn't count
+    lower_endpoint = (x1, y1) if y1 < y2 else (x2, y2)
+    if xp == lower_endpoint[0] and yt == lower_endpoint[1]:
+        return False
+
+    # - crossed in the middle of the line segment
+    return xp >= xt
 
 
 def has_crossed(xt, yt, x1, y1, x2, y2, k=1):

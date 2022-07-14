@@ -6,6 +6,8 @@ import numpy as np
 from numpy import *
 import serial
 import serial.tools.list_ports
+# import time
+
 
 class lighTagAlgo:
     """
@@ -391,7 +393,7 @@ def test():
     lt = lighTagAlgo()
     
     # 2. Wifi connection
-    lt.wifiConnect()
+    # lt.wifiConnect()
     
     # 2. Or Serial connection
     # lt.serialConnect()
@@ -403,15 +405,19 @@ def test():
     lt.setBaseDCoor(5.86,0.0,2.355)
     
     # for debug only
-    # arr = [4.04,6.05,6.78,5.4]
-    # lt.setDistance(arr)
-    # lt.calculateTriPosition()
-    # lt.calculateQuartPosition()
-    # print(lt.getCoor())
+    arr = [4.04,6.05,6.78,5.4]
+    lt.setDistance(arr)
+    lt.calculateTriPosition()
+    lt.calculateQuartPosition()
+    print(lt.getCoor())
     
     # Loop
-    while True:
-        print(lt.run())
+    # while True:
+    #     print(lt.run())
     
 if (__name__ == "__main__"):
+    # start_time = time.time()
     test()
+    # end_time = time.time()
+    # print(f"It took {end_time-start_time:.2f} seconds to compute")
+

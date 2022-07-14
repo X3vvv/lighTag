@@ -54,7 +54,7 @@ class lighTagAlgo:
         print("Starts to connect socket.")
 
         self.c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.c.bind(("192.168.0.114", 8234))
+        self.c.bind(("192.168.0.103", 8234))
         self.c.listen(10)
         self.client, self.address = self.c.accept()
 
@@ -248,40 +248,50 @@ class lighTagAlgo:
         return [locx, locy]
 
     def calculateQuartPosition(self):
-        [a,b] = self.calculateTriPosition()
+        [a, b] = self.calculateTriPosition()
         z1 = sympy.symbols("z1")
-        f1 = np.square(a-self.xD)+np.square(b-self.yD)+np.square(z1-self.zD)-np.square(self.disArr[3])
-        rst1 = sympy.solve(f1,z1)
-        
+        f1 = (
+            np.square(a - self.xD)
+            + np.square(b - self.yD)
+            + np.square(z1 - self.zD)
+            - np.square(self.disArr[3])
+        )
+        rst1 = sympy.solve(f1, z1)
+
         z2 = sympy.symbols("z2")
-        f2 = np.square(a-self.xB)+np.square(b-self.yB)+np.square(z2-self.zB)-np.square(self.disArr[1])
-        rst2 = sympy.solve(f2,z2)
-        
+        f2 = (
+            np.square(a - self.xB)
+            + np.square(b - self.yB)
+            + np.square(z2 - self.zB)
+            - np.square(self.disArr[1])
+        )
+        rst2 = sympy.solve(f2, z2)
+
         sol1 = list(rst1)
         sol2 = list(rst2)
-        
-        if (complex(sol1[0]).real>complex(sol1[1]).real):
-            sol1[0],sol1[1] = sol1[1],sol1[0]
-            
-        if (complex(sol2[0]).real>complex(sol2[1]).real):
-            sol2[0],sol2[1] = sol2[1],sol2[0]
-        
-        min1 = abs(sol1[0]-sol2[0])
-        min2 = abs(sol1[1]-sol2[1])
-        
-        min0 = min(min1,min2)
-        
+
+        if complex(sol1[0]).real > complex(sol1[1]).real:
+            sol1[0], sol1[1] = sol1[1], sol1[0]
+
+        if complex(sol2[0]).real > complex(sol2[1]).real:
+            sol2[0], sol2[1] = sol2[1], sol2[0]
+
+        min1 = abs(sol1[0] - sol2[0])
+        min2 = abs(sol1[1] - sol2[1])
+
+        min0 = min(min1, min2)
+
         out = 0
-        
+
         if min0 == min1:
-            out = (sol1[0] + sol2[0])/2
+            out = (sol1[0] + sol2[0]) / 2
         elif min0 == min2:
-            out = (sol1[1] + sol2[1])/2
-            
+            out = (sol1[1] + sol2[1]) / 2
+
         out = complex(out).real
-        
-        self.coorArr = [a,b,out]
-        return [a,b,out]
+
+        self.coorArr = [a, b, out]
+        return [a, b, out]
 
     def getCoor(self):
         """return the coordinates of the tag

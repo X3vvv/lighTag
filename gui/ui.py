@@ -1,200 +1,54 @@
-from random import random
-import backend
-
 from kivy.config import Config
 
 Config.read("./gui/lighTag/config.ini")
 
+from random import random
 from kivy.app import App
-from kivy.uix.widget import Widget
+from kivy.clock import Clock
+from kivy.graphics import Color, Ellipse, Line, Rectangle
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.uix.textinput import TextInput
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.clock import Clock
-from kivy.graphics import Line, Color, Ellipse
+from kivy.uix.textinput import TextInput
+from kivy.uix.widget import Widget
+
+import backend
 
 # from kivy.lang.builder import Builder
-
 # Builder.load_file("ui.kv")
 
-
-class Base:
-    SIDE_LEN = 17  # side length of the squred base button
-    FONT_SIZE = 13  # font size of the text on the button
-    CANVAS_ORIGIN_OFFSET = (0, 250)  # canvas origin's position relative to the window
-
-    # no class variable is defined
-
-    def __init__(self, id, father_widget):
-        """
-        Instance variables (values differs in different instances):
-            self.id: base id
-            self.widget: kivy button widget
-            self.father_widget: kivy father widget of the base button
-            self.x = y = z: position of the base button on the canvas
-        """
-        self.id = id
-
-        # init base position on the canvas
-        self.x = 0
-        self.y = 0
-        self.z = 0
-
-        # create the button
-        self.widget = self.create_button()
-        # father widget
-        self.father_widget = father_widget
-
-    def update_pos(self, x, y, z=None):
-        """Update button position fields values and window position."""
-        # update fields
-        self.x = x
-        self.y = y
-        if z is not None:
-            self.z = z
-
-        # update widget on window
-        self.widget.pos = (x, y)
-
-    def get_pos_on_window(self):
-        """Return the position of the base button on the whole 2D window."""
-        return (
-            self.x + self.CANVAS_ORIGIN_OFFSET[0],
-            self.y + self.CANVAS_ORIGIN_OFFSET[1],
-        )
-
-    def create_button(self):
-        btn = Button(
-            text=str(self.id),
-            font_size=self.FONT_SIZE,
-            size_hint=(None, None),
-            size=(self.SIDE_LEN, self.SIDE_LEN),
-            pos=self.get_pos_on_window(),
-            on_release=self._on_button_released,
-        )
-        self.id += 1
-        return btn
-
-    def _on_button_released(self):
-        """Callback function for when the base button is released. A popup window will be created."""
-
-        def create_popup_window(self):
-            """Create a popup window for the base button."""
-
-            def popup_confirm(confirm_btn):
-                """Callback function of confirm button in the base popup window. If the input isn't number, set to 0 by default."""
-                x = y = z = 0
-                if base_x.text.isdigit():
-                    x = float(base_x.text)
-                if base_y.text.isdigit():
-                    y = float(base_y.text)
-                if base_z.text.isdigit():
-                    z = float(base_z.text)
-                if x < 0:
-                    x = 0
-                elif x > self.ids.canvas_temp_label.size[0] - 17:
-                    x = self.ids.canvas_temp_label.size[0] - 17
-                if y < 0:
-                    y = 0
-                elif y > self.ids.canvas_temp_label.size[1] - 17:
-                    y = self.ids.canvas_temp_label.size[1] - 17
-                self.widget.pos = [x, y + self.father_widget.ids.control_panel.height]
-                self.father_widget.ids.canvas.remove_widget(popup)
-
-            def delete_base(delete_btn):
-                """Callback function of delete button in the base popup window."""
-                # def confirm_delete_base(confirm_delete_btn):
-                #     self.ids.canvas.remove_widget(doubleCheckPopup)
-
-                # def cancel_delete_base(cancel_delete_btn):
-                #     self.ids.canvas.remove_widget(doubleCheckPopup)
-
-                # doubleCheckLayout = BoxLayout(orientation="vertical")
-                # doubleCheckLayout.add_widget(
-                #     Label(text="Are you sure to delete this base?", font_size=20)
-                # )
-                # doubleCheckLayout.add_widget(
-                #     Button(text="Yes", size_hint=(1, 0.4), on_release=confirm_delete_base)
-                # )
-                # doubleCheckLayout.add_widget(
-                #     Button(text="Cancel", size_hint=(1, 0.4), on_release=cancel_delete_base)
-                # )
-                # doubleCheckPopup = Popup(
-                #     title="Settings",
-                #     content=doubleCheckLayout,
-                #     size_hint=(None, None),
-                #     size=(200, 150),
-                #     pos_hint={
-                #         "center_x": 0.5,
-                #         "center_y": 0.500,
-                #     },
-                # )
-                # self.ids.canvas.add_widget(doubleCheckPopup)
-                pass
-
-            # main layout of the popup window
-            mainLayout = BoxLayout(orientation="vertical")
-
-            # layout which holds all the position information
-            posLayout = GridLayout(cols=2)
-
-            base_x = TextInput(multiline=False, text="0", font_size=10)
-            base_y = TextInput(multiline=False, text="0", font_size=10)
-            base_z = TextInput(multiline=False, text="0", font_size=10)
-
-            posLayout.add_widget(Label(text="x:"))
-            posLayout.add_widget(base_x)
-            posLayout.add_widget(Label(text="y:"))
-            posLayout.add_widget(base_y)
-            posLayout.add_widget(Label(text="z:"))
-            posLayout.add_widget(base_z)
-
-            mainLayout.add_widget(posLayout)
-
-            # add confirm button
-            mainLayout.add_widget(
-                Button(text="Confirm", size_hint=(1, 0.45), on_release=popup_confirm)
-            )
-
-            # add delete button
-            mainLayout.add_widget(
-                Button(
-                    text="Delete",
-                    size_hint=(1, 0.45),
-                    color=(1, 30 / 255, 30 / 255, 1),
-                    on_release=delete_base,
-                    disabled=True,
-                )
-            )
-
-            # add main layout to the popup window
-            return Popup(
-                title="Settings",
-                content=mainLayout,
-                size_hint=(None, None),
-                size=(250, 200),
-                pos_hint={"center_x": 0.5, "center_y": 0.5},  # center of father widget
-            )
-
-        popup = create_popup_window()
-        self.ids.canvas.add_widget(popup)
+DEBUG_UI = True  # if True, won't connect backend, run simulation data instead
 
 
 class MainLayout(Widget):
-    num_of_base = 0
-    focused_base = None
-    bases = []
+    aoi_corners = []
+    aoi_edges = {
+        "normal": {},
+        "closing line": {},
+    }  # {edge_name: edge_object} e.g., {1-2: <edge object xxxx>}
     CENTIMETER_PER_PIXEL = 1.5  # how many centimeters a kivy pixel represents
 
     draw_path_has_started = False
     draw_path_event = None
 
-    INTERVAL = 1
+    FIRST_FLOOR_CELLING_HEIGHT = (
+        1.5  # h >= FIRST_FLOOR_CELLING_HEIGHT: 2F, h < FIRST_FLOOR_CELLING_HEIGHT: 1F
+    )
+    FLOOR_COLORS = {
+        "default": (0.9, 0.1, 0.1, 0.9),
+        "1": (101 / 255, 9 / 255, 179 / 255, 1),
+        "2": (0 / 255, 166 / 255, 66 / 255, 1),
+    }
+    path_dot_color = None  # color of the dot used to draw the path
 
-    tmp_pos = [120, 240]
+    PATH_DOT_DIAMETER_IN_PIXEL = 10
+    REVERSE_XY = True  # reverse x-y axis
+    CLOCK_SCHEDULE_INTERVAL = 1  # interval of the callbacks added to the clock
+
+    alive_path_dot_list = []  # stores a list of (color, circle) tuples
+    PATH_DOT_LIFETIME = 8  # (unit: update time) each path dot's life time, old dots will gradually fade out and be removed from the alive_path_dot_list lise
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -203,31 +57,132 @@ class MainLayout(Widget):
         self.tagBaseDist = [-1, -1, -1, -1]
 
         self.start_backend()
-        Clock.schedule_interval(lambda dt: self.update_tag_base_dist(), self.INTERVAL)
+        Clock.schedule_interval(
+            lambda dt: self.update_tag_data(), self.CLOCK_SCHEDULE_INTERVAL
+        )
 
     def start_backend(self):
-        lt = backend.lighTagAlgo()
-        lt.wifiConnect()
-        lt.setBaseACoor(0, 0, 2.0)
-        lt.setBaseBCoor(0, 8.535, 2.0)
-        lt.setBaseCCoor(5.86, 8.535, 2.0)
-        lt.setBaseDCoor(5.86, 0.0, 2.355)
-        Clock.schedule_interval(lambda dt: lt.run(), self.INTERVAL)
-        self.lt = lt
+        if DEBUG_UI:
+            self.tagPos = [2, 2, 2]
+            self.tagBaseDist = [7.777, 7.777, 7.777, 7.777]
 
-    def update_tag_base_dist(self):
+            def gen_simulate_data():
+                # simulate tagPos change
+                xy_delta = 1
+                z_delta = 1
+                self.tagPos[0] += random() * xy_delta - xy_delta / 2
+                self.tagPos[1] += random() * xy_delta - xy_delta / 2
+                self.tagPos[2] += random() * z_delta - z_delta / 2
+
+                # simulate tagBaseDist change
+                dist_delta = 1
+                for i in range(len(self.tagBaseDist)):
+                    self.tagBaseDist[i] += random() * dist_delta - dist_delta / 2
+
+            Clock.schedule_interval(
+                lambda dt: gen_simulate_data(), self.CLOCK_SCHEDULE_INTERVAL
+            )
+
+        else:
+            lt = backend.lighTagAlgo()
+            lt.wifiConnect()
+            lt.setBaseACoor(0, 0, 2.0)
+            lt.setBaseBCoor(0, 8.535, 2.0)
+            lt.setBaseCCoor(5.86, 8.535, 2.0)
+            lt.setBaseDCoor(5.86, 0.0, 2.355)
+            Clock.schedule_interval(lambda dt: lt.run(), self.CLOCK_SCHEDULE_INTERVAL)
+            self.lt = lt
+        print("Starting backend")
+
+    def update_tag_data(self):
         """Update text of tag-base distances label on the window."""
-        self.tagBaseDist = self.lt.getDistance()
-        tmp = self.lt.getCoor()
-        # self.tagPos = self.lt.getCoor()
-        for i in range(len(tmp)):
-            self.tagPos[i] = (
-                tmp[i] * 100 / self.CENTIMETER_PER_PIXEL
-            )  # m * cm/m / cm/px
-        self.ids.tag_distance.text = "Tag distance (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}".format(
-            *self.tagBaseDist
+        if DEBUG_UI:
+            # haven't connected to backend, simulate tag's data
+            self.tagBaseDist = self.tagBaseDist
+            self.tagPos = self.tagPos
+        else:
+            # get data from backend
+            self.tagBaseDist = self.lt.getDistance()
+            self.tagPos = self.lt.getCoor()
+
+        # reverse X-Y axis if needed
+        if self.REVERSE_XY:
+            self.tagPos[0], self.tagPos[1] = self.tagPos[1], self.tagPos[0]
+
+        # fix cross borders problem
+        for i in range(len(self.tagPos)):
+            if self.tagPos[i] < 0:
+                self.tagPos[i] = 0
+
+        # update tag_distance label
+        self.ids.tag_distance.text = "Tag info (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}\n\n(x:{:.1f}, y:{:.1f}, h:{:.1f})".format(
+            *self.tagBaseDist, *self.tagPos
         )
-        print(self.tagPos)
+
+        # update floor label
+        floor = "1" if self.tagPos[2] < self.FIRST_FLOOR_CELLING_HEIGHT else "2"
+        self.ids.floor_label.text = f"Floor: {floor} L"
+
+        # update colors of floor label & path dots
+        self.path_dot_color = self._get_floor_color(floor)
+        self.ids.floor_label.color = self._get_floor_color(floor)
+
+        # check whether in the target area
+        if len(self.aoi_corners) < 3:
+            return
+        if self.is_in_the_area(
+            (
+                self._get_tag_pixel_pos()[0],
+                self._get_tag_pixel_pos()[1] + self.ids.control_panel.height,
+            ),
+            self._get_all_aoi_corners_pos(),
+        ):
+            self._indicate_tag_in_AOI()
+        else:
+            self._cancle_tag_in_AOI_indication()
+
+    def _indicate_tag_in_AOI(self):
+        """Indicate that tag is within AOI by changing debug button background color."""
+        # print(
+        #     "[√] tag {}, is inside area made of {}".format(
+        #         (
+        #             self._get_tag_pixel_pos()[0],
+        #             self._get_tag_pixel_pos()[1] + self.ids.control_panel.height,
+        #         ),
+        #         self.aoi_corners,
+        #     )
+        # )
+        indication_widget = self.ids.debug_btn
+        indication_widget.background_color = (79 / 255, 255 / 255, 77 / 255, 1)
+        # with indication_widget.canvas.before:
+        #     Color(79 / 255, 255 / 255, 77 / 255, 1)
+        #     Rectangle(pos=indication_widget.pos, size=indication_widget.size)
+        indication_widget.text = "Target inside the area!"
+
+    def _cancle_tag_in_AOI_indication(self):
+        """Cancle the indication that tag is within AOI by changing debug button background color back."""
+        # print(
+        #     "[X] tag {}, is inside area made of {}".format(
+        #         (
+        #             self._get_tag_pixel_pos()[0],
+        #             self._get_tag_pixel_pos()[1] + self.ids.control_panel.height,
+        #         ),
+        #         self.aoi_corners,
+        #     )
+        # )
+        indication_widget = self.ids.debug_btn
+        indication_widget.background_color = (255 / 255, 13 / 255, 215 / 255, 1)
+        # with indication_widget.canvas.before:
+        #     Color(255 / 255, 13 / 255, 215 / 255, 1)
+        #     Rectangle(pos=indication_widget.pos, size=indication_widget.size)
+        indication_widget.text = "Target outside the area."
+
+    def _get_floor_color(self, floor: str):
+        """Get the floor color according to the floor layer."""
+        if floor in self.FLOOR_COLORS.keys():
+            return self.FLOOR_COLORS[floor]
+        else:
+            return self.FLOOR_COLORS["default"]
 
     def _on_settings_pressed(self):
         """Not used yet."""
@@ -238,31 +193,170 @@ class MainLayout(Widget):
         """Not used yet."""
         self.ids.settings_img.source = "imgs/settings-outline.png"
 
-    def add_base(self):
+    def add_AOI_corner(self):
         """Callback function for adding a base button to the canvas."""
-        base_id = self.num_of_base + 1
-        new_base = Button(
-            text=str(base_id),
+        corner_id = len(self.aoi_corners) + 1
+        new_corner = Button(
+            text=str(corner_id),
             font_size=13,
             size_hint=(None, None),
             size=(17, 17),
-            # pos_hint={"x": 0.5, "y": 0.5},
             pos=(
                 0,
                 self.ids.control_panel.height,
             ),  # pos of left-bottom corner of the button
             on_release=self._on_base_released,
         )
-        self.bases.append(new_base)
-        self.ids.canvas.add_widget(new_base)  # add widget to the canvas widget
-        self.num_of_base += 1
+        self.aoi_corners.append(new_corner)
+        self.ids.canvas.add_widget(new_corner)  # add widget to the canvas widget
+
+        # connect the 2 most recent added corners
+        if len(self.aoi_corners) >= 2:
+            self._create_edge(-1, -2)
+
+        # connect the last corner with the first corner
+        if len(self.aoi_corners) >= 3:
+            assert (
+                len(self.aoi_edges["closing line"]) <= 1
+                and len(self.aoi_edges["closing line"]) >= 0
+            )
+
+            # remove last closing line
+            if len(self.aoi_edges["closing line"]) == 1:
+                old_closing_line = list(self.aoi_edges["closing line"].values())[0]
+                self.remove_instance_from_canvas(old_closing_line)
+                self.aoi_edges["closing line"].clear()
+
+            # create a new closing line
+            self._create_edge(0, -1, "closing line")
+
+    def _get_all_aoi_corners_pos(self):
+        """Return position of all corners of AOI. e.g., [(330, 220), (220, 330), (0, 250)]"""
+        all_corners_pos = []
+        for corner in self.aoi_corners:
+            all_corners_pos.append(corner.pos)
+        return all_corners_pos
+
+    def remove_instance_from_canvas(self, inst):
+        self.ids.canvas.canvas.remove(inst)
+
+    def _create_edge(self, start_corner_idx, end_corner_idx, edge_type: str = "normal"):
+        """
+        Create a edge between the corners of AOI (Area of Interests).
+        #Params
+        start_corner_idx: index (for 'aoi_corners' array) of the AOI cornor where the edge starts from.
+        end_corner_idx: index (for 'aoi_corners' array) of the AOI cornor where the edge ends to.
+        edge_type: type of this edge, whether a edge created automatically to close the AOI.
+        """
+        if edge_type != "normal" and edge_type != "closing line":
+            raise ValueError("Edge type can only be 'normal' or 'closing line'.")
+        start_corner = self.aoi_corners[start_corner_idx]
+        end_corner = self.aoi_corners[end_corner_idx]
+        new_edge_name = "{}-{}".format(start_corner.text, end_corner.text)
+        new_edge = self._draw_a_line(start_corner.pos, end_corner.pos)
+        self.aoi_edges[edge_type][new_edge_name] = new_edge
+        return new_edge
+
+    def _draw_a_line(self, start_pos, end_pos):
+        color = Color(1, 0, 0, 0.7)
+        line = Line(
+            points=[*start_pos, *end_pos],
+            width=2,
+            joint="round",
+        )
+        self.ids.canvas.canvas.add(color)
+        self.ids.canvas.canvas.add(line)
+
+        return line
+
+    def update_edges(self, corner_id):
+        """Update all the edges of the AOI (area of interests). Called when path dots' position are changed."""
+        for edge_type in self.aoi_edges.keys():
+            for edge_name in self.aoi_edges[edge_type].keys():
+                curr_edge = self.aoi_edges[edge_type][edge_name]
+                curr_corner = self.aoi_corners[int(corner_id) - 1]
+                start_corner_id, end_corner_id = self._get_corners_by_edge_name(
+                    edge_name
+                )
+                start_corner_points, end_corner_points = (
+                    curr_edge.points[0:2],
+                    curr_edge.points[2:4],
+                )
+                # update the new position of corners
+                if start_corner_id == str(corner_id):
+                    start_corner_points = curr_corner.pos
+                elif end_corner_id == str(corner_id):
+                    end_corner_points = curr_corner.pos
+                # no update needed, skip the current loop
+                else:
+                    continue
+
+                # update the edge's position
+                curr_edge.points = [*start_corner_points, *end_corner_points]
+
+    def _get_corners_by_edge_name(self, edge_name):
+        """Returns if the id of the corners where the edge starts and ends. e.g., ((200, 10), (330, 220))"""
+        start_corner_id, end_corner_id = edge_name.split("-")
+        return start_corner_id, end_corner_id
+
+    def is_in_the_area(self, target_dot, area_corners) -> bool:
+        """
+        Return True if the target position is inside the area.
+
+        #Params
+        target_dot: (x, y) position of the target dot.
+        area_corners: a list of (x, y) position tuple of all the corners of the area. e.g., [(1,2), (2,4), (4,3)]
+        """
+
+        def ray_method(xt, yt, x1, y1, x2, y2) -> bool:
+            """
+            Whether the ray starts from (xt, yt) will cross the line segment with endpoints of (x1, y1) & (x2, y2).
+
+            #Param:
+            xt, yt: endpoint of the ray.
+            x1, y1, x2, y2: the two endpoints of the line segment.
+
+            #Return:
+            True if ray crossed the line segment (exclude the lower endpoint).
+            """
+
+            # if (xt, yt) on line segment, crossed
+            if min(x1, x2) <= xt <= max(x1, x2):
+                if y1 == y2 and yt == y1:
+                    return True
+                if xt == (yt - y2) * (x1 - x2) / (y1 - y2) + x2:
+                    return True
+
+            # ignore horizontal line segment
+            if y1 == y2:
+                return False
+
+            # find whether crossing
+            # - exclude the situation where crossing on the extension of the line segment
+            if yt < min(y1, y2) or yt > max(y1, y2):
+                return False
+            xp = (yt - y2) * (x1 - x2) / (y1 - y2) + x2
+            # - lower endpoint doesn't count
+            lower_endpoint = (x1, y1) if y1 < y2 else (x2, y2)
+            if xp == lower_endpoint[0] and yt == lower_endpoint[1]:
+                return False
+
+            # - crossed in the middle of the line segment
+            return xp >= xt
+
+        cross_times = 0
+        for i in range(len(area_corners)):
+            x1, y1 = area_corners[i]
+            x2, y2 = area_corners[(i + 1) % len(area_corners)]
+            if ray_method(*target_dot, x1, y1, x2, y2):
+                cross_times += 1
+        return (cross_times % 2) == 1
 
     def _on_base_released(self, base_btn):
         """Callback function for when the base button is released. A popup window will be created."""
 
         def popup_confirm(confirm_btn):
             """Callback function of confirm button in the base popup window."""
-            # print(confirm_btn)
             x = y = z = 0
             if base_x.text.isdigit():
                 x = float(base_x.text)
@@ -270,7 +364,7 @@ class MainLayout(Widget):
                 y = float(base_y.text)
             if base_z.text.isdigit():
                 z = float(base_z.text)
-            print(x, y, z)
+            # print(x, y, z)
             if x < 0:
                 x = 0
             elif x > self.ids.canvas_temp_label.size[0] - 17:
@@ -281,6 +375,9 @@ class MainLayout(Widget):
                 y = self.ids.canvas_temp_label.size[1] - 17
             base_btn.pos = [x, y + self.ids.control_panel.height]
             self.ids.canvas.remove_widget(popup)
+
+            # update all edges related to this moved button
+            self.update_edges(base_btn.text)
 
         def delete_base(delete_btn):
             """Callback function of delete button in the base popup window."""
@@ -361,50 +458,117 @@ class MainLayout(Widget):
         self.ids.canvas.add_widget(popup)
 
     def debug(self):
-        # DEBUG: print base position of the window
-        if len(self.bases) <= 0:
-            print("No base yet.")
+        """Print some debug info."""
+        # print global positions of all the bases
+        print("========= DEBUG messages =========")
+        print("Base details:")
+        if len(self.aoi_corners) <= 0:
+            print("\tNo base yet.")
         else:
-            for i in range(len(self.bases)):
-                print("[base {}] pos on window: {}]".format(i, self.bases[i].pos))
+            for i in range(len(self.aoi_corners)):
+                print(
+                    "\t[base {}] pos on window: {}]".format(i, self.aoi_corners[i].pos)
+                )
+        print()
 
-        # DEBUG: print tagBaseDist & tagPos
-        print(
-            "Tag-base distances:\n\t {}\n\t {}\n\t {}\n\t {}".format(*self.tagBaseDist)
-        )
-        print("Tag location: {}".format(self.tagPos))
+        # print all drawed circles
+        print("Canvas instructions details:")
+        for color, circle in self.alive_path_dot_list:
+            print("\t{}\n\t{}\n".format(color, circle))
+        print()
+
+        # print AOI corners
+        print("All AOI corners:")
+        for corner in self.aoi_corners:
+            print("\t", corner.pos)
+
+        # print target point
+        print("Target point:")
+        print("\t", self._get_tag_pixel_pos())
+
+    def get_all_AOI_edges(self):
+        all_edges = []
+        for edge_type in self.aoi_edges.keys():
+            for edge in self.aoi_edges[edge_type].values():
+                all_edges.append(edge)
+        return all_edges
 
     def on_plot_path_released(self):
-        def draw_path_callback(duration_after_last_call):
-            self.draw_a_circle(self.tagPos[0], self.tagPos[1])
+        """Callback function of 'plot path' button."""
 
-        if self.draw_path_has_started:  # IS drawing path, will stop drawing
+        def draw_path_callback():
+            # draw a circle on the canvas
+            new_path_dot_color, new_path_dot = self._draw_a_circle(
+                *self._get_tag_pixel_pos()[:2],
+                self.PATH_DOT_DIAMETER_IN_PIXEL,
+                self.path_dot_color,
+            )
+            # add circle to alive path dot list
+            self.alive_path_dot_list.append((new_path_dot_color, new_path_dot))
+            self.update_old_path_dots()
+
+        # IS drawing path, will stop drawing
+        if self.draw_path_has_started:
             if self.draw_path_event is None:
                 raise ValueError(
                     "draw_path_event is supposed to be a event but None value is detected."
                 )
             self.draw_path_event.cancel()
             self.draw_path_has_started = False
-            self.ids.start_plotting_path_btn.text = "START plotting path"
             # print("-- Draw path event has been cancelled")
-        else:  # is NOT drawing path, will start drawing
-            self.draw_path_event = Clock.schedule_interval(draw_path_callback, 1)
+            self.ids.start_plotting_path_btn.text = "START plotting path"
+        # is NOT drawing path, will start drawing
+        else:
+            self.draw_path_event = Clock.schedule_interval(
+                lambda dt: draw_path_callback(), 1
+            )
             self.draw_path_has_started = True
-            self.ids.start_plotting_path_btn.text = "STOP plotting path"
             # print("-- Draw path event has started")
+            self.ids.start_plotting_path_btn.text = "STOP plotting path"
 
-    def draw_a_circle(self, x, y, d=5):
+    def _draw_a_circle(self, x, y, d, color=(1, 1, 1, 1)):
         """
         Plot a circle on the canvas.
         #Param
         x: x-coords of the circle on the canvas
         y: y-coords of the circle on the canvas
-        r: diameter of the circle
+        d: diameter of the circle
+        color: color of the circle
+        #Return
+        Color of the circle and the circle instance.
         """
-        print("Draw a circle at: [{}, {}]".format(x, y))
-        with self.ids.canvas.canvas:
-            Color(0.9, 0.1, 0.1, 0.9)
-            Ellipse(pos=(x, y + self.ids.control_panel.height), size=(d, d))
+        # canvas add new color and circle
+        circle_color = Color(*color)
+        circle_instance = Ellipse(
+            pos=(x, y + self.ids.control_panel.height),
+            size=(d, d),
+        )
+        self.ids.canvas.canvas.add(circle_color)
+        self.ids.canvas.canvas.add(circle_instance)
+
+        return circle_color, circle_instance
+
+    def update_old_path_dots(self):
+        """Update exists path dots: decrease the opacity of all dots and remove dots with opacity of 0 from alive_path_dot_list."""
+        to_be_deleted_dot_idx_list = []
+        for i in range(len(self.alive_path_dot_list)):
+            curr_circle_color = self.alive_path_dot_list[i][0]
+            if curr_circle_color.a <= 0:
+                to_be_deleted_dot_idx_list.append(i)
+            else:
+                curr_circle_color.a -= 1 / self.PATH_DOT_LIFETIME
+
+        for dot_idx in to_be_deleted_dot_idx_list:
+            del self.alive_path_dot_list[dot_idx]
+
+    def _get_tag_pixel_pos(self):
+        """Get tag position in pixel (unit: meter -> pixel)."""
+        pixel_pos = self.tagPos.copy()
+        for i in range(len(pixel_pos)):
+            pixel_pos[i] = (
+                pixel_pos[i] * 100 / self.CENTIMETER_PER_PIXEL
+            )  # m * cm/m / cm/px
+        return pixel_pos
 
 
 class UIApp(App):

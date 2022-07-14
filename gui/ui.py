@@ -16,7 +16,7 @@ from kivy.uix.widget import Widget
 
 import backend
 
-USE_BACKEND = True  # if False, won't connect backend, run simulation data instead
+USE_BACKEND = False  # if False, won't connect backend, run simulation data instead
 
 
 class MainLayout(Widget):
@@ -291,7 +291,8 @@ class MainLayout(Widget):
 
         def ray_method(xt, yt, x1, y1, x2, y2) -> bool:
             """
-            Whether the ray starts from (xt, yt) will cross the line segment with endpoints of (x1, y1) & (x2, y2).
+            Whether the ray starts from (xt, yt) will cross the line segment with
+            endpoints of (x1, y1) & (x2, y2).
 
             #Param:
             xt, yt: endpoint of the ray.
@@ -300,7 +301,6 @@ class MainLayout(Widget):
             #Return:
             True if ray crossed the line segment (exclude the lower endpoint).
             """
-
             # if (xt, yt) on line segment, crossed
             if min(x1, x2) <= xt <= max(x1, x2):
                 if y1 == y2:
@@ -315,7 +315,8 @@ class MainLayout(Widget):
                 return False
 
             # find whether crossing
-            # - exclude the situation where crossing on the extension of the line segment
+            # - exclude the situation where crossing on the extension of the line
+            #   segment
             if yt < min(y1, y2) or yt > max(y1, y2):
                 return False
             xp = (yt - y2) * (x1 - x2) / (y1 - y2) + x2

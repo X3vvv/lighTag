@@ -8,6 +8,8 @@ import serial
 import serial.tools.list_ports
 import time
 
+tmp = 0
+
 
 class lighTagAlgo:
     """
@@ -101,7 +103,11 @@ class lighTagAlgo:
         """
         For WIFI data
         """
+        global tmp
         bytes = self.client.recv(1024)
+        new_tmp = time.time()
+        print("{:.1f}".format(new_tmp - tmp))
+        tmp = time.time()
         # print(
         #     "[{}.{}]: ".format(
         #         time.strftime("%H:%M:%S", time.localtime()), int(time.time() * 10) % 10
@@ -440,7 +446,8 @@ def test():
 
     # Loop
     while True:
-        print(lt.run())
+        # print(lt.run())
+        lt.run()
 
 
 if __name__ == "__main__":

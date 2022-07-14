@@ -43,7 +43,7 @@ class MainLayout(Widget):
 
     PATH_DOT_DIAMETER_IN_PIXEL = 20
     # REVERSE_XY = True  # reverse x-y axis
-    CLOCK_SCHEDULE_INTERVAL = 1  # interval of the callbacks added to the clock
+    CLOCK_SCHEDULE_INTERVAL = 0.5  # interval of the callbacks added to the clock
 
     alive_path_dot_list = []  # stores a list of (color, circle) tuples
     PATH_DOT_LIFETIME = 6  # (unit: update time) each path dot's life time, old dots will gradually fade out and be removed from the alive_path_dot_list lise
@@ -84,14 +84,15 @@ class MainLayout(Widget):
         else:
             lt = backend.lighTagAlgo()
             lt.wifiConnect()
-            lt.setBaseACoor(0, 0, 2.0)
-            lt.setBaseBCoor(0, 8.535, 2.0)
-            lt.setBaseCCoor(5.86, 8.535, 2.0)
-            lt.setBaseDCoor(5.86, 0.0, 2.355)
+            # # x: A-D, y: A-B
             # lt.setBaseACoor(0, 0, 2.0)
-            # lt.setBaseBCoor(8.535, 0, 2.0)
-            # lt.setBaseCCoor(8.535, 5.86, 2.0)
-            # lt.setBaseDCoor(0.0, 5.86, 2.355)
+            # lt.setBaseBCoor(0, 8.535, 2.0)
+            # lt.setBaseCCoor(5.86, 8.535, 2.0)
+            # lt.setBaseDCoor(5.86, 0.0, 2.355)
+            lt.setBaseACoor(0, 5.86, 2.0)
+            lt.setBaseBCoor(8.535, 5.86, 2.0)
+            lt.setBaseCCoor(8.535, 0, 2.0)
+            lt.setBaseDCoor(0.0, 0, 2.355)
             Clock.schedule_interval(lambda dt: lt.run(), self.CLOCK_SCHEDULE_INTERVAL)
             self.lt = lt
         print("Starting backend")

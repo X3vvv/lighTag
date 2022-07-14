@@ -88,6 +88,10 @@ class MainLayout(Widget):
             lt.setBaseBCoor(0, 8.535, 2.0)
             lt.setBaseCCoor(5.86, 8.535, 2.0)
             lt.setBaseDCoor(5.86, 0.0, 2.355)
+            # lt.setBaseACoor(0, 0, 2.0)
+            # lt.setBaseBCoor(8.535, 0, 2.0)
+            # lt.setBaseCCoor(8.535, 5.86, 2.0)
+            # lt.setBaseDCoor(0.0, 5.86, 2.355)
             Clock.schedule_interval(lambda dt: lt.run(), self.CLOCK_SCHEDULE_INTERVAL)
             self.lt = lt
         print("Starting backend")
@@ -298,10 +302,12 @@ class MainLayout(Widget):
 
             # if (xt, yt) on line segment, crossed
             if min(x1, x2) <= xt <= max(x1, x2):
-                if y1 == y2 and yt == y1:
-                    return True
-                if xt == (yt - y2) * (x1 - x2) / (y1 - y2) + x2:
-                    return True
+                if y1 == y2:
+                    if yt == y1:
+                        return True
+                else:
+                    if xt == (yt - y2) * (x1 - x2) / (y1 - y2) + x2:
+                        return True
 
             # ignore horizontal line segment
             if y1 == y2:

@@ -5,7 +5,7 @@ Config.read("./gui/lighTag/config.ini")
 from random import random
 from kivy.app import App
 from kivy.clock import Clock
-from kivy.graphics import Color, Ellipse, Line
+from kivy.graphics import Color, Ellipse, Line, Rectangle
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
@@ -137,25 +137,45 @@ class MainLayout(Widget):
             ),
             self._get_all_aoi_corners_pos(),
         ):
-            print(
-                "[√] tag {}, is inside area made of {}".format(
-                    (
-                        self._get_tag_pixel_pos()[0],
-                        self._get_tag_pixel_pos()[1] + self.ids.control_panel.height,
-                    ),
-                    self.aoi_corners,
-                )
-            )
+            self._indicate_tag_in_AOI()
         else:
-            print(
-                "[X] tag {}, is inside area made of {}".format(
-                    (
-                        self._get_tag_pixel_pos()[0],
-                        self._get_tag_pixel_pos()[1] + self.ids.control_panel.height,
-                    ),
-                    self.aoi_corners,
-                )
-            )
+            self._cancle_tag_in_AOI_indication()
+
+    def _indicate_tag_in_AOI(self):
+        """Indicate that tag is within AOI by changing debug button background color."""
+        # print(
+        #     "[√] tag {}, is inside area made of {}".format(
+        #         (
+        #             self._get_tag_pixel_pos()[0],
+        #             self._get_tag_pixel_pos()[1] + self.ids.control_panel.height,
+        #         ),
+        #         self.aoi_corners,
+        #     )
+        # )
+        indication_widget = self.ids.debug_btn
+        indication_widget.background_color = (79 / 255, 255 / 255, 77 / 255, 1)
+        # with indication_widget.canvas.before:
+        #     Color(79 / 255, 255 / 255, 77 / 255, 1)
+        #     Rectangle(pos=indication_widget.pos, size=indication_widget.size)
+        indication_widget.text = "Target inside the area!"
+
+    def _cancle_tag_in_AOI_indication(self):
+        """Cancle the indication that tag is within AOI by changing debug button background color back."""
+        # print(
+        #     "[X] tag {}, is inside area made of {}".format(
+        #         (
+        #             self._get_tag_pixel_pos()[0],
+        #             self._get_tag_pixel_pos()[1] + self.ids.control_panel.height,
+        #         ),
+        #         self.aoi_corners,
+        #     )
+        # )
+        indication_widget = self.ids.debug_btn
+        indication_widget.background_color = (255 / 255, 13 / 255, 215 / 255, 1)
+        # with indication_widget.canvas.before:
+        #     Color(255 / 255, 13 / 255, 215 / 255, 1)
+        #     Rectangle(pos=indication_widget.pos, size=indication_widget.size)
+        indication_widget.text = "Target outside the area."
 
     def _get_floor_color(self, floor: str):
         """Get the floor color according to the floor layer."""

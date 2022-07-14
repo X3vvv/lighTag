@@ -104,7 +104,9 @@ class lighTagAlgo:
         For WIFI data
         """
         global tmp
+
         bytes = self.client.recv(1024)
+
         new_tmp = time.time()
         print("{:.1f}".format(new_tmp - tmp))
         tmp = time.time()

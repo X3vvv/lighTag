@@ -53,10 +53,13 @@ class lighTagAlgo:
         """
         For WIFI connection
         """
+        IP = "192.168.0.110"
+        PORT = 8234
+        
         print("Starts to connect socket.")
 
         self.c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.c.bind(("192.168.0.110", 8234))
+        self.c.bind((IP, PORT))
         self.c.listen(10)
         self.client, self.address = self.c.accept()
 
@@ -67,7 +70,8 @@ class lighTagAlgo:
         """
         For serial port connection
         """
-        self.ser = serial.Serial("/dev/cu.usbserial-110", 115200)
+        SERIAL_NAME = "/dev/cu.usbserial-110"
+        self.ser = serial.Serial(SERIAL_NAME, 115200)
         if self.ser.isOpen():
             print("Serial port connected.")
             print(self.ser.name)
@@ -110,12 +114,6 @@ class lighTagAlgo:
         new_tmp = time.time()
         print("(interval: {:.1f}s)".format(new_tmp - tmp), end=" ")
         tmp = time.time()
-        # print(
-        #     "[{}.{}]: ".format(
-        #         time.strftime("%H:%M:%S", time.localtime()), int(time.time() * 10) % 10
-        #     ),
-        #     end="",
-        # )
         return bytes.hex()
 
     def getSerialData(self):
@@ -409,9 +407,15 @@ class lighTagAlgo:
             or, -1 for error, need to be checked and skipped
         """
 
+        # 4. Get raw distance data from Wifi
         str = self.getWifiData()
+        # 4.  Or Get raw distance data from serial
+        # str = lt.getSerialData()
+        
+        # 5. convert the raw data to real distance data via side-effect
         dis = self.convertDistance(str)
 
+        # 6. Calculate the coordinates of the tag
         if dis != -1:  # check if the distance is valid
             return self.calculateQuartPosition()  # calculate the coordinates of the tag
         return -1

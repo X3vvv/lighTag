@@ -8,8 +8,6 @@ import serial
 import serial.tools.list_ports
 import time
 
-tmp = 0
-
 
 class lighTagAlgo:
     """
@@ -107,13 +105,7 @@ class lighTagAlgo:
         """
         For WIFI data
         """
-        global tmp
-
         bytes = self.client.recv(1024)
-
-        new_tmp = time.time()
-        print("(interval: {:.1f}s)".format(new_tmp - tmp), end=" ")
-        tmp = time.time()
         return bytes.hex()
 
     def getSerialData(self):

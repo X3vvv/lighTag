@@ -5,7 +5,6 @@ Config.read("./gui/config.ini")
 from random import random
 from threading import Thread
 import time
-from tqdm import tqdm
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.graphics import Color, Ellipse, Line, Rectangle
@@ -19,7 +18,7 @@ from kivy.uix.widget import Widget
 
 import backend
 
-USE_BACKEND = False  # if False, won't connect backend, run simulation data instead
+USE_BACKEND = True  # if False, won't connect backend, run simulation data instead
 
 
 class MainLayout(Widget):
@@ -46,8 +45,7 @@ class MainLayout(Widget):
 
     PATH_DOT_DIAMETER_IN_PIXEL = 20
     # REVERSE_XY = True  # reverse x-y axis
-    CLOCK_SCHEDULE_INTERVAL = 0.5  # interval of the callbacks added to the clock
-
+    CLOCK_SCHEDULE_INTERVAL = 0.2
     alive_path_dot_list = []  # stores a list of (color, circle) tuples
     PATH_DOT_LIFETIME = 6  # (unit: update time) each path dot's life time, old dots will gradually fade out and be removed from the alive_path_dot_list lise
 
@@ -143,8 +141,9 @@ class MainLayout(Widget):
             lt.setBaseDCoor(*base_d_coor)
 
             def backend_loop():
-                time.sleep(0.1)
-                lt.run()
+                while 1:
+                    time.sleep(0.1)
+                    print(lt.run())
 
             # Clock.schedule_interval(lambda dt: lt.run(), self.CLOCK_SCHEDULE_INTERVAL)
             self.backend_thread = Thread(target=backend_loop, name="BackendThread")
@@ -165,12 +164,20 @@ class MainLayout(Widget):
             self.tagPos = self.lt.getCoor()
 
         # update tag_distance label
+        x, y, z = self.tagPos
+        if z is None:
+            z = -1
         self.ids.tag_distance.text = "Tag info (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}\n\n(x:{:.1f}, y:{:.1f}, h:{:.1f})".format(
-            *self.tagBaseDist, *self.tagPos
+            *self.tagBaseDist, x, y, z
         )
 
         # update floor label
-        floor = "1" if self.tagPos[2] < self.FIRST_FLOOR_CELLING_HEIGHT else "2"
+        if self.tagPos[2] is None:
+            floor = "N/A"
+        elif self.tagPos[2] < self.FIRST_FLOOR_CELLING_HEIGHT:
+            floor = "1"
+        else:
+            floor = "2"
         self.ids.floor_label.text = f"Floor: {floor} L"
 
         # update colors of floor label & path dots
@@ -598,10 +605,14 @@ class MainLayout(Widget):
 
         # fix cross borders problem
         for i in range(len(pixel_pos)):
+            if pixel_pos[i] is None:
+                continue
             if pixel_pos[i] < 0:
                 pixel_pos[i] = 0
 
         for i in range(len(pixel_pos)):
+            if pixel_pos[i] is None:
+                pixel_pos[i] = -1
             pixel_pos[i] = (
                 pixel_pos[i] * 100 / self.CENTIMETER_PER_PIXEL
             )  # m * cm/m / cm/px

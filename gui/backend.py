@@ -56,7 +56,7 @@ class lighTagAlgo:
         print("Starts to connect socket.")
 
         self.c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.c.bind(("192.168.0.103", 8234))
+        self.c.bind(("192.168.0.110", 8234))
         self.c.listen(10)
         self.client, self.address = self.c.accept()
 
@@ -108,7 +108,7 @@ class lighTagAlgo:
         bytes = self.client.recv(1024)
 
         new_tmp = time.time()
-        print("{:.1f}".format(new_tmp - tmp))
+        print("(interval: {:.1f})".format(new_tmp - tmp), end=' ')
         tmp = time.time()
         # print(
         #     "[{}.{}]: ".format(
@@ -448,8 +448,8 @@ def test():
 
     # Loop
     while True:
-        # print(lt.run())
-        lt.run()
+        print(lt.run())
+        # lt.run()
 
 
 if __name__ == "__main__":

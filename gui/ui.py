@@ -167,8 +167,14 @@ class MainLayout(Widget):
         x, y, z = self.tagPos
         if z is None:
             z = -1
-        self.ids.tag_distance.text = "Tag info (m)\nbase1:  {:.2f}\nbase2:  {:.2f}\nbase3:  {:.2f}\nbase4:  {:.2f}\n\n(x:{:.1f}, y:{:.1f}, h:{:.1f})".format(
-            *self.tagBaseDist, x, y, z
+        self.ids.tag_distance.text = "Tag info (m)   Tag location:\nbase1:  {:.2f}        x: {:.1f},\nbase2:  {:.2f}        y: {:.1f},\nbase3:  {:.2f}        z: {:.1f}\nbase4:  {:.2f}".format(
+            self.tagBaseDist[0],
+            x,
+            self.tagBaseDist[1],
+            y,
+            self.tagBaseDist[2],
+            z,
+            self.tagBaseDist[3],
         )
 
         # update floor label

@@ -108,7 +108,7 @@ class lighTagAlgo:
         bytes = self.client.recv(1024)
 
         new_tmp = time.time()
-        print("(interval: {:.1f})".format(new_tmp - tmp), end=' ')
+        print("(interval: {:.1f}s)".format(new_tmp - tmp), end=" ")
         tmp = time.time()
         # print(
         #     "[{}.{}]: ".format(
